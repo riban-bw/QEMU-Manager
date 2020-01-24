@@ -1,0 +1,200 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<wxsmith>
+	<object class="wxFrame" name="QEMU_ManagerFrame">
+		<title>riban QEMU Manager</title>
+		<id_arg>0</id_arg>
+		<object class="wxSplitterWindow" name="ID_SPLITTERWINDOW1" variable="SplitterWindow1" member="yes">
+			<sashpos>100</sashpos>
+			<minpanesize>10</minpanesize>
+			<orientation>vertical</orientation>
+			<pos>152,216</pos>
+			<object class="wxScrolledWindow" name="ID_SCROLLEDWINDOW1" variable="ScrolledWindow1" member="yes">
+				<pos>144,286</pos>
+				<object class="wxFlexGridSizer" variable="FlexGridSizer3" member="no">
+					<cols>1</cols>
+					<growablecols>0</growablecols>
+					<growablerows>0</growablerows>
+					<object class="sizeritem">
+						<object class="wxListBox" name="ID_LISTBOX1" variable="m_pLstVms" member="yes">
+							<default>-1</default>
+							<handler function="OnVmSelect" entry="EVT_LISTBOX" />
+						</object>
+						<flag>wxEXPAND</flag>
+					</object>
+				</object>
+			</object>
+			<object class="wxScrolledWindow" name="ID_SCROLLEDWINDOW2" variable="ScrolledWindow2" member="yes">
+				<object class="wxFlexGridSizer" variable="FlexGridSizer2" member="no">
+					<cols>2</cols>
+					<growablecols>1</growablecols>
+					<object class="sizeritem">
+						<object class="wxStaticText" name="ID_STATICTEXT1" variable="StaticText1" member="yes">
+							<label>Name</label>
+							<style>wxALIGN_RIGHT|wxALIGN_CENTRE</style>
+						</object>
+						<flag>wxALL|wxEXPAND</flag>
+						<border>5</border>
+						<option>1</option>
+					</object>
+					<object class="sizeritem">
+						<object class="wxTextCtrl" name="ID_TEXTCTRL1" variable="m_pTxtName" member="yes">
+							<handler function="OnVmNameChange" entry="EVT_TEXT" />
+						</object>
+						<flag>wxALL|wxEXPAND</flag>
+						<border>5</border>
+						<option>1</option>
+					</object>
+					<object class="sizeritem">
+						<object class="wxStaticText" name="ID_STATICTEXT2" variable="StaticText2" member="yes">
+							<label>System</label>
+						</object>
+						<flag>wxALL|wxALIGN_CENTER_HORIZONTAL|wxALIGN_CENTER_VERTICAL</flag>
+						<border>5</border>
+						<option>1</option>
+					</object>
+					<object class="sizeritem">
+						<object class="wxChoice" name="ID_CHOICE1" variable="m_pCmbSystem" member="yes">
+							<handler function="OnVmSystemChange" entry="EVT_CHOICE" />
+						</object>
+						<flag>wxALL|wxEXPAND</flag>
+						<border>5</border>
+						<option>1</option>
+					</object>
+					<object class="sizeritem">
+						<object class="wxStaticText" name="ID_STATICTEXT3" variable="StaticText3" member="yes">
+							<label>Disk Image</label>
+						</object>
+						<flag>wxALL|wxALIGN_CENTER_HORIZONTAL|wxALIGN_CENTER_VERTICAL</flag>
+						<border>5</border>
+						<option>1</option>
+					</object>
+					<object class="sizeritem">
+						<object class="wxFilePickerCtrl" name="ID_FILEPICKERCTRL1" variable="m_pTxtImage" member="yes">
+							<message>Select disk image</message>
+							<wildcard>Disk Images (*.qcow;*.qcow2;*.img;*.raw)|*.qcow;*.qcow2;*.img;*.raw|All files (*.*)|*.*</wildcard>
+							<handler function="OnVmImageChange" entry="EVT_FILEPICKER_CHANGED" />
+						</object>
+						<flag>wxALL|wxEXPAND</flag>
+						<border>5</border>
+						<option>1</option>
+					</object>
+					<object class="sizeritem">
+						<object class="wxStaticText" name="ID_STATICTEXT4" variable="StaticText4" member="yes">
+							<label>Memory (MB)</label>
+						</object>
+						<flag>wxALL|wxALIGN_CENTER_HORIZONTAL|wxALIGN_CENTER_VERTICAL</flag>
+						<border>5</border>
+						<option>1</option>
+					</object>
+					<object class="sizeritem">
+						<object class="wxTextCtrl" name="ID_TEXTCTRL3" variable="m_pTxtMemory" member="yes">
+							<handler function="OnVmMemoryChange" entry="EVT_TEXT" />
+						</object>
+						<flag>wxALL|wxEXPAND</flag>
+						<border>5</border>
+						<option>1</option>
+					</object>
+					<object class="sizeritem">
+						<object class="wxStaticText" name="ID_STATICTEXT6" variable="StaticText6" member="yes">
+							<label>Show Display</label>
+						</object>
+						<flag>wxALL|wxALIGN_CENTER_HORIZONTAL|wxALIGN_CENTER_VERTICAL</flag>
+						<border>5</border>
+						<option>1</option>
+					</object>
+					<object class="sizeritem">
+						<object class="wxCheckBox" name="ID_CHECKBOX1" variable="m_pChkShowDisplay" member="yes">
+							<checked>1</checked>
+							<handler function="OnVmShowDisplayChange" entry="EVT_CHECKBOX" />
+						</object>
+						<flag>wxALL|wxEXPAND</flag>
+						<border>5</border>
+						<option>1</option>
+					</object>
+					<object class="sizeritem">
+						<object class="wxStaticText" name="ID_STATICTEXT5" variable="StaticText5" member="yes">
+							<label>Other parameters</label>
+						</object>
+						<flag>wxALL|wxALIGN_CENTER_HORIZONTAL|wxALIGN_CENTER_VERTICAL</flag>
+						<border>5</border>
+						<option>1</option>
+					</object>
+					<object class="sizeritem">
+						<object class="wxTextCtrl" name="ID_TEXTCTRL4" variable="m_pTxtParams" member="yes">
+							<handler function="OnVmParamsChange" entry="EVT_TEXT" />
+						</object>
+						<flag>wxALL|wxEXPAND</flag>
+						<border>5</border>
+						<option>1</option>
+					</object>
+				</object>
+			</object>
+		</object>
+		<object class="wxMenuBar" variable="MenuBar1" member="no">
+			<object class="wxMenu" variable="Menu1" member="no">
+				<label>&amp;File</label>
+				<object class="wxMenuItem" name="ID_MENU_SAVE" variable="MenuItem3" member="yes">
+					<label>&amp;Save</label>
+					<accel>Ctrl+s</accel>
+					<help>Save configuration</help>
+					<handler function="OnSave" entry="EVT_MENU" />
+				</object>
+				<object class="wxMenuItem" name="idMenuQuit" variable="MenuItem1" member="no">
+					<label>Quit</label>
+					<accel>Alt-F4</accel>
+					<help>Quit the application</help>
+					<handler function="OnQuit" entry="EVT_MENU" />
+				</object>
+			</object>
+			<object class="wxMenu" variable="Menu2" member="no">
+				<label>Help</label>
+				<object class="wxMenuItem" name="idMenuAbout" variable="MenuItem2" member="no">
+					<label>About</label>
+					<accel>F1</accel>
+					<help>Show info about this application</help>
+					<handler function="OnAbout" entry="EVT_MENU" />
+				</object>
+			</object>
+		</object>
+		<object class="wxStatusBar" name="ID_STATUSBAR1" variable="StatusBar1" member="yes">
+			<fields>1</fields>
+			<widths>-1</widths>
+			<styles>wxSB_NORMAL</styles>
+		</object>
+		<object class="wxToolBar" name="ID_TOOLBAR1" variable="m_pToolbar" member="yes">
+			<object class="tool" name="ID_TOOLBAR_NEW" variable="m_pToolbtnNew" member="yes">
+				<label>New VM</label>
+				<bitmap stock_id="wxART_NEW" />
+				<handler function="OnNewVm" entry="EVT_TOOL" />
+			</object>
+			<object class="tool" name="ID_TOOLBAR_DELETE" variable="m_pToolbtnDelete" member="yes">
+				<label>Delete VM</label>
+				<bitmap stock_id="wxART_DELETE" />
+				<handler function="OnDeleteVm" entry="EVT_TOOL" />
+			</object>
+			<object class="tool" name="ID_TOOLBAR_START" variable="m_pToolbtnStart" member="yes">
+				<label>Start VM</label>
+				<bitmap stock_id="wxART_TICK_MARK" />
+				<handler function="OnStartVm" entry="EVT_TOOL" />
+			</object>
+			<object class="tool" name="ID_TOOLBAR_RESTART" variable="m_pToolbtnRestart" member="yes">
+				<label>Restart VM</label>
+				<bitmap stock_id="wxART_REDO" />
+			</object>
+			<object class="tool" name="ID_TOOLBAR_STOP" variable="m_pToolbtnStop" member="yes">
+				<label>Stop VM</label>
+				<bitmap stock_id="wxART_CROSS_MARK" />
+			</object>
+			<object class="tool" name="ID_TOOLBAR_SAVE" variable="m_pToolbtnSave" member="yes">
+				<label>Save</label>
+				<bitmap stock_id="wxART_FILE_SAVE" />
+				<handler function="OnSave" entry="EVT_TOOL" />
+			</object>
+			<object class="tool" name="ID_TOOLBAR_PREFERENCES" variable="m_pToolbtnPreferences" member="yes">
+				<label>Preferences</label>
+				<bitmap stock_id="wxART_LIST_VIEW" />
+				<handler function="OnPreferences" entry="EVT_TOOL" />
+			</object>
+		</object>
+	</object>
+</wxsmith>
