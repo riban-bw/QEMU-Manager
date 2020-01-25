@@ -87,7 +87,7 @@
 				<gui name="wxWidgets" src="src/qemu_managerapp.cpp" main="QEMU_ManagerFrame" init_handlers="necessary" language="CPP" />
 				<resources>
 					<wxFrame wxs="wxsmith/qemu_managerframe.wxs" src="src/qemu_managermain.cpp" hdr="include/qemu_managermain.h" fwddecl="0" i18n="1" name="QEMU_ManagerFrame" language="CPP" />
-					<wxDialog wxs="wxsmith/preferencesdialog.wxs" src="preferencesdialog.cpp" hdr="preferencesdialog.h" fwddecl="0" i18n="1" name="PreferencesDialog" language="CPP" />
+					<wxDialog wxs="wxsmith/preferencesdialog.wxs" src="src/preferencesdialog.cpp" hdr="include/preferencesdialog.h" fwddecl="0" i18n="1" name="PreferencesDialog" language="CPP" />
 				</resources>
 			</wxsmith>
 		</Extensions>

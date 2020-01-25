@@ -1,23 +1,27 @@
 /***************************************************************
- * Name:      QEMU_ManagerMain.cpp
+ * Name:      qemu_managermain.cpp
  * Purpose:   Code for Application Frame
  * Author:    Brian Walton (brian@riban.co.uk)
  * Created:   2020-01-23
  * Copyright: Brian Walton (riban.co.uk)
- * License:
+ * License:   GPL-V3
  **************************************************************/
 
 #include "QEMU_ManagerMain.h"
 #include <wx/msgdlg.h>
 #include <wx/dir.h>
 #include <wx/display.h>
+#include <wx/filename.h>
 #include "preferencesdialog.h"
+#include "icon.xpm"
+#include <wx/process.h>
 
 using namespace std;
 
 //(*InternalHeaders(QEMU_ManagerFrame)
 #include <wx/artprov.h>
 #include <wx/bitmap.h>
+#include <wx/icon.h>
 #include <wx/image.h>
 #include <wx/intl.h>
 #include <wx/string.h>
@@ -38,9 +42,10 @@ const long QEMU_ManagerFrame::ID_STATICTEXT6 = wxNewId();
 const long QEMU_ManagerFrame::ID_CHECKBOX1 = wxNewId();
 const long QEMU_ManagerFrame::ID_STATICTEXT5 = wxNewId();
 const long QEMU_ManagerFrame::ID_TEXTCTRL4 = wxNewId();
+const long QEMU_ManagerFrame::ID_STATICTEXT7 = wxNewId();
+const long QEMU_ManagerFrame::ID_STATICTEXT8 = wxNewId();
 const long QEMU_ManagerFrame::ID_SCROLLEDWINDOW2 = wxNewId();
 const long QEMU_ManagerFrame::ID_SPLITTERWINDOW1 = wxNewId();
-const long QEMU_ManagerFrame::ID_MENU_SAVE = wxNewId();
 const long QEMU_ManagerFrame::idMenuQuit = wxNewId();
 const long QEMU_ManagerFrame::idMenuAbout = wxNewId();
 const long QEMU_ManagerFrame::ID_STATUSBAR1 = wxNewId();
@@ -49,9 +54,9 @@ const long QEMU_ManagerFrame::ID_TOOLBAR_DELETE = wxNewId();
 const long QEMU_ManagerFrame::ID_TOOLBAR_START = wxNewId();
 const long QEMU_ManagerFrame::ID_TOOLBAR_RESTART = wxNewId();
 const long QEMU_ManagerFrame::ID_TOOLBAR_STOP = wxNewId();
-const long QEMU_ManagerFrame::ID_TOOLBAR_SAVE = wxNewId();
 const long QEMU_ManagerFrame::ID_TOOLBAR_PREFERENCES = wxNewId();
 const long QEMU_ManagerFrame::ID_TOOLBAR1 = wxNewId();
+const long QEMU_ManagerFrame::ID_TIMER = wxNewId();
 //*)
 
 BEGIN_EVENT_TABLE(QEMU_ManagerFrame,wxFrame)
@@ -72,6 +77,11 @@ QEMU_ManagerFrame::QEMU_ManagerFrame(wxWindow* parent,wxWindowID id)
     wxMenuItem* MenuItem2;
 
     Create(parent, wxID_ANY, _("riban QEMU Manager"), wxDefaultPosition, wxDefaultSize, wxDEFAULT_FRAME_STYLE, _T("wxID_ANY"));
+    {
+    	wxIcon FrameIcon;
+    	FrameIcon.CopyFromBitmap(icon);
+    	SetIcon(FrameIcon);
+    }
     SplitterWindow1 = new wxSplitterWindow(this, ID_SPLITTERWINDOW1, wxPoint(152,216), wxDefaultSize, wxSP_3D, _T("ID_SPLITTERWINDOW1"));
     SplitterWindow1->SetMinimumPaneSize(10);
     SplitterWindow1->SetSashGravity(0.5);
@@ -112,6 +122,10 @@ QEMU_ManagerFrame::QEMU_ManagerFrame(wxWindow* parent,wxWindowID id)
     FlexGridSizer2->Add(StaticText5, 1, wxALL|wxALIGN_CENTER_HORIZONTAL|wxALIGN_CENTER_VERTICAL, 5);
     m_pTxtParams = new wxTextCtrl(ScrolledWindow2, ID_TEXTCTRL4, wxEmptyString, wxDefaultPosition, wxDefaultSize, 0, wxDefaultValidator, _T("ID_TEXTCTRL4"));
     FlexGridSizer2->Add(m_pTxtParams, 1, wxALL|wxEXPAND, 5);
+    StaticText7 = new wxStaticText(ScrolledWindow2, ID_STATICTEXT7, _("Status"), wxDefaultPosition, wxDefaultSize, 0, _T("ID_STATICTEXT7"));
+    FlexGridSizer2->Add(StaticText7, 1, wxALL|wxALIGN_CENTER_HORIZONTAL|wxALIGN_CENTER_VERTICAL, 5);
+    m_pLblStatus = new wxStaticText(ScrolledWindow2, ID_STATICTEXT8, _("Unknown"), wxDefaultPosition, wxDefaultSize, 0, _T("ID_STATICTEXT8"));
+    FlexGridSizer2->Add(m_pLblStatus, 1, wxALL|wxEXPAND, 5);
     ScrolledWindow2->SetSizer(FlexGridSizer2);
     FlexGridSizer2->Fit(ScrolledWindow2);
     FlexGridSizer2->SetSizeHints(ScrolledWindow2);
@@ -119,8 +133,6 @@ QEMU_ManagerFrame::QEMU_ManagerFrame(wxWindow* parent,wxWindowID id)
     SplitterWindow1->SetSashPosition(100);
     MenuBar1 = new wxMenuBar();
     Menu1 = new wxMenu();
-    MenuItem3 = new wxMenuItem(Menu1, ID_MENU_SAVE, _("&Save\tCtrl+s"), _("Save configuration"), wxITEM_NORMAL);
-    Menu1->Append(MenuItem3);
     MenuItem1 = new wxMenuItem(Menu1, idMenuQuit, _("Quit\tAlt-F4"), _("Quit the application"), wxITEM_NORMAL);
     Menu1->Append(MenuItem1);
     MenuBar1->Append(Menu1, _("&File"));
@@ -129,22 +141,23 @@ QEMU_ManagerFrame::QEMU_ManagerFrame(wxWindow* parent,wxWindowID id)
     Menu2->Append(MenuItem2);
     MenuBar1->Append(Menu2, _("Help"));
     SetMenuBar(MenuBar1);
-    StatusBar1 = new wxStatusBar(this, ID_STATUSBAR1, 0, _T("ID_STATUSBAR1"));
+    m_pStatusbar = new wxStatusBar(this, ID_STATUSBAR1, 0, _T("ID_STATUSBAR1"));
     int __wxStatusBarWidths_1[1] = { -1 };
     int __wxStatusBarStyles_1[1] = { wxSB_NORMAL };
-    StatusBar1->SetFieldsCount(1,__wxStatusBarWidths_1);
-    StatusBar1->SetStatusStyles(1,__wxStatusBarStyles_1);
-    SetStatusBar(StatusBar1);
+    m_pStatusbar->SetFieldsCount(1,__wxStatusBarWidths_1);
+    m_pStatusbar->SetStatusStyles(1,__wxStatusBarStyles_1);
+    SetStatusBar(m_pStatusbar);
     m_pToolbar = new wxToolBar(this, ID_TOOLBAR1, wxDefaultPosition, wxDefaultSize, wxTB_HORIZONTAL|wxNO_BORDER, _T("ID_TOOLBAR1"));
     m_pToolbtnNew = m_pToolbar->AddTool(ID_TOOLBAR_NEW, _("New VM"), wxArtProvider::GetBitmap(wxART_MAKE_ART_ID_FROM_STR(_T("wxART_NEW")),wxART_TOOLBAR), wxNullBitmap, wxITEM_NORMAL, wxEmptyString, wxEmptyString);
     m_pToolbtnDelete = m_pToolbar->AddTool(ID_TOOLBAR_DELETE, _("Delete VM"), wxArtProvider::GetBitmap(wxART_MAKE_ART_ID_FROM_STR(_T("wxART_DELETE")),wxART_TOOLBAR), wxNullBitmap, wxITEM_NORMAL, wxEmptyString, wxEmptyString);
     m_pToolbtnStart = m_pToolbar->AddTool(ID_TOOLBAR_START, _("Start VM"), wxArtProvider::GetBitmap(wxART_MAKE_ART_ID_FROM_STR(_T("wxART_TICK_MARK")),wxART_TOOLBAR), wxNullBitmap, wxITEM_NORMAL, wxEmptyString, wxEmptyString);
     m_pToolbtnRestart = m_pToolbar->AddTool(ID_TOOLBAR_RESTART, _("Restart VM"), wxArtProvider::GetBitmap(wxART_MAKE_ART_ID_FROM_STR(_T("wxART_REDO")),wxART_TOOLBAR), wxNullBitmap, wxITEM_NORMAL, wxEmptyString, wxEmptyString);
-    m_pToolbtnStop = m_pToolbar->AddTool(ID_TOOLBAR_STOP, _("Stop VM"), wxArtProvider::GetBitmap(wxART_MAKE_ART_ID_FROM_STR(_T("wxART_CROSS_MARK")),wxART_TOOLBAR), wxNullBitmap, wxITEM_NORMAL, wxEmptyString, wxEmptyString);
-    m_pToolbtnSave = m_pToolbar->AddTool(ID_TOOLBAR_SAVE, _("Save"), wxArtProvider::GetBitmap(wxART_MAKE_ART_ID_FROM_STR(_T("wxART_FILE_SAVE")),wxART_TOOLBAR), wxNullBitmap, wxITEM_NORMAL, wxEmptyString, wxEmptyString);
+    m_pToolbtnKill = m_pToolbar->AddTool(ID_TOOLBAR_STOP, _("Kill VM"), wxArtProvider::GetBitmap(wxART_MAKE_ART_ID_FROM_STR(_T("wxART_CROSS_MARK")),wxART_TOOLBAR), wxNullBitmap, wxITEM_NORMAL, wxEmptyString, wxEmptyString);
     m_pToolbtnPreferences = m_pToolbar->AddTool(ID_TOOLBAR_PREFERENCES, _("Preferences"), wxArtProvider::GetBitmap(wxART_MAKE_ART_ID_FROM_STR(_T("wxART_LIST_VIEW")),wxART_TOOLBAR), wxNullBitmap, wxITEM_NORMAL, wxEmptyString, wxEmptyString);
     m_pToolbar->Realize();
     SetToolBar(m_pToolbar);
+    m_pTimer.SetOwner(this, ID_TIMER);
+    m_pTimer.Start(5000, false);
 
     Connect(ID_LISTBOX1,wxEVT_COMMAND_LISTBOX_SELECTED,(wxObjectEventFunction)&QEMU_ManagerFrame::OnVmSelect);
     Connect(ID_TEXTCTRL1,wxEVT_COMMAND_TEXT_UPDATED,(wxObjectEventFunction)&QEMU_ManagerFrame::OnVmNameChange);
@@ -153,14 +166,14 @@ QEMU_ManagerFrame::QEMU_ManagerFrame(wxWindow* parent,wxWindowID id)
     Connect(ID_TEXTCTRL3,wxEVT_COMMAND_TEXT_UPDATED,(wxObjectEventFunction)&QEMU_ManagerFrame::OnVmMemoryChange);
     Connect(ID_CHECKBOX1,wxEVT_COMMAND_CHECKBOX_CLICKED,(wxObjectEventFunction)&QEMU_ManagerFrame::OnVmShowDisplayChange);
     Connect(ID_TEXTCTRL4,wxEVT_COMMAND_TEXT_UPDATED,(wxObjectEventFunction)&QEMU_ManagerFrame::OnVmParamsChange);
-    Connect(ID_MENU_SAVE,wxEVT_COMMAND_MENU_SELECTED,(wxObjectEventFunction)&QEMU_ManagerFrame::OnSave);
     Connect(idMenuQuit,wxEVT_COMMAND_MENU_SELECTED,(wxObjectEventFunction)&QEMU_ManagerFrame::OnQuit);
     Connect(idMenuAbout,wxEVT_COMMAND_MENU_SELECTED,(wxObjectEventFunction)&QEMU_ManagerFrame::OnAbout);
     Connect(ID_TOOLBAR_NEW,wxEVT_COMMAND_TOOL_CLICKED,(wxObjectEventFunction)&QEMU_ManagerFrame::OnNewVm);
     Connect(ID_TOOLBAR_DELETE,wxEVT_COMMAND_TOOL_CLICKED,(wxObjectEventFunction)&QEMU_ManagerFrame::OnDeleteVm);
     Connect(ID_TOOLBAR_START,wxEVT_COMMAND_TOOL_CLICKED,(wxObjectEventFunction)&QEMU_ManagerFrame::OnStartVm);
-    Connect(ID_TOOLBAR_SAVE,wxEVT_COMMAND_TOOL_CLICKED,(wxObjectEventFunction)&QEMU_ManagerFrame::OnSave);
+    Connect(ID_TOOLBAR_STOP,wxEVT_COMMAND_TOOL_CLICKED,(wxObjectEventFunction)&QEMU_ManagerFrame::OnKillVm);
     Connect(ID_TOOLBAR_PREFERENCES,wxEVT_COMMAND_TOOL_CLICKED,(wxObjectEventFunction)&QEMU_ManagerFrame::OnPreferences);
+    Connect(ID_TIMER,wxEVT_TIMER,(wxObjectEventFunction)&QEMU_ManagerFrame::OnTimer);
     //*)
 
     LoadConfig();
@@ -173,16 +186,13 @@ QEMU_ManagerFrame::~QEMU_ManagerFrame()
 {
     //(*Destroy(QEMU_ManagerFrame)
     //*)
-    m_bIhibitDirty = true;
     while(m_vVm.size())
         DeleteVm(m_vVm[0]);
 }
 
 void QEMU_ManagerFrame::OnClose(wxCloseEvent& event)
 {
-    if(event.CanVeto() && m_bDirty)
-        if(wxMessageBox("Save configuration before closing?", "Please confirm", wxYES_NO) == wxYES)
-            SaveConfig();
+    SaveConfig();
     SaveScreen();
     delete m_pConfig;
     m_pConfig = NULL;
@@ -199,11 +209,6 @@ void QEMU_ManagerFrame::OnAbout(wxCommandEvent& event)
     wxMessageBox("QEMU Manager\n\nriban (2020)", "About");
 }
 
-void QEMU_ManagerFrame::OnSave(wxCommandEvent& event)
-{
-    SaveConfig();
-}
-
 void QEMU_ManagerFrame::OnNewVm(wxCommandEvent& event)
 {
     QemuVm* pVm = new QemuVm();
@@ -211,7 +216,6 @@ void QEMU_ManagerFrame::OnNewVm(wxCommandEvent& event)
     m_nCurrentVm = m_vVm.size() - 1;
     RefreshVmList();
     OnVmSelect(event);
-    SetDirty();
 }
 
 void QEMU_ManagerFrame::RefreshVmList()
@@ -227,6 +231,8 @@ void QEMU_ManagerFrame::RefreshVmList()
 
 void QEMU_ManagerFrame::DeleteVm(QemuVm* pVm)
 {
+    if(!pVm)
+        return;
     //!@todo Stop VM
     auto it = m_vVm.begin();
     for(; it != m_vVm.end(); ++it)
@@ -242,7 +248,6 @@ void QEMU_ManagerFrame::DeleteVm(QemuVm* pVm)
     if(m_pConfig)
         m_pConfig->DeleteGroup(pVm->GetName());
     delete pVm;
-    SetDirty();
 }
 
 void QEMU_ManagerFrame::OnDeleteVm(wxCommandEvent& event)
@@ -260,7 +265,6 @@ void QEMU_ManagerFrame::OnDeleteVm(wxCommandEvent& event)
 
 void QEMU_ManagerFrame::OnVmSelect(wxCommandEvent& event)
 {
-    m_bIhibitDirty = true;
     int nSelection = m_pLstVms->GetSelection();
     if(nSelection == wxNOT_FOUND)
         return;
@@ -272,7 +276,24 @@ void QEMU_ManagerFrame::OnVmSelect(wxCommandEvent& event)
     m_pTxtMemory->SetValue(wxString::Format("%d", pVm->GetMemory()));
     m_pCmbSystem->SetSelection(m_pCmbSystem->FindString(pVm->GetSystem()));
     m_pChkShowDisplay->SetValue(pVm->GetShowDisplay());
-    m_bIhibitDirty = false;
+    bool bRunning = pVm->IsRunning();
+    EnableEdit(!bRunning);
+    wxString sStatus;
+    if(bRunning)
+        sStatus = wxString::Format("Running (PID: %d)", pVm->GetPid());
+    else
+        sStatus = "Stopped";
+    m_pLblStatus->SetLabel(sStatus);
+}
+
+void QEMU_ManagerFrame::EnableEdit(bool bEnable)
+{
+    m_pTxtName->Enable(bEnable);
+    m_pTxtParams->Enable(bEnable);
+    m_pTxtImage->Enable(bEnable);
+    m_pTxtMemory->Enable(bEnable);
+    m_pCmbSystem->Enable(bEnable);
+    m_pChkShowDisplay->Enable(bEnable);
 }
 
 void QEMU_ManagerFrame::SaveVm(QemuVm* pVm)
@@ -286,14 +307,14 @@ void QEMU_ManagerFrame::SaveVm(QemuVm* pVm)
     m_pConfig->Write(wxString::Format("%s/memory", pVm->GetName().c_str()), pVm->GetMemory());
     m_pConfig->Write(wxString::Format("%s/showdisplay", pVm->GetName().c_str()), pVm->GetShowDisplay());
     m_pConfig->Write(wxString::Format("%s/params", pVm->GetName().c_str()), pVm->GetParams());
+    m_pConfig->Write(wxString::Format("%s/pid", pVm->GetName().c_str()), pVm->GetPid());
 }
 
 void QEMU_ManagerFrame::LoadConfig()
 {
     if(!m_pConfig)
         m_pConfig = new wxConfig("qemumanager", "riban");
-    m_pConfig->Read("QEMU/Path", &m_sQemuPath);
-    wxArrayString asKeys;
+    m_pConfig->Read("QEMU/Path", &QemuVm::QEMU_PATH);
     wxString sKey;
     long lCookie;
     m_pConfig->SetPath("/VM");
@@ -314,13 +335,14 @@ void QEMU_ManagerFrame::LoadConfig()
         pVm->SetParams(sValue);
         m_pConfig->Read(sKey + "/memory", &lValue);
         pVm->SetMemory(lValue);
-        m_pConfig->Read(sKey + "showdisplay", &bValue, true);
+        m_pConfig->Read(sKey + "/showdisplay", &bValue, true);
         pVm->SetShowDisplay(bValue);
+        m_pConfig->Read(sKey + "/pid", &lValue, 0);
+        pVm->IsRunning(lValue);
         m_vVm.push_back(pVm);
         bMoreGroups = m_pConfig->GetNextGroup(sKey, lCookie);
     }
     PopulateSystems();
-    SetDirty(false);
 }
 
 void QEMU_ManagerFrame::PopulateSystems()
@@ -328,7 +350,7 @@ void QEMU_ManagerFrame::PopulateSystems()
     m_pCmbSystem->Clear();
     // Get the available systems from the executable file names
     wxArrayString asFiles;
-    wxDir::GetAllFiles(m_sQemuPath, &asFiles, "qemu-system-*");
+    wxDir::GetAllFiles(QemuVm::QEMU_PATH, &asFiles, "qemu-system-*");
     for(unsigned int nIndex = 0; nIndex < asFiles.GetCount(); ++nIndex)
     {
         wxString sSystem = asFiles[nIndex].AfterLast('-');
@@ -342,7 +364,6 @@ void QEMU_ManagerFrame::SaveConfig()
 {
     for(auto it = m_vVm.begin(); it != m_vVm.end(); ++it)
         SaveVm(*it);
-    SetDirty(false);
 }
 
 void QEMU_ManagerFrame::OnPreferences(wxCommandEvent& event)
@@ -366,7 +387,6 @@ void QEMU_ManagerFrame::OnVmNameChange(wxCommandEvent& event)
     if(!pVm)
         return;
     pVm->SetName(event.GetString());
-    SetDirty();
     RefreshVmList();
 }
 
@@ -376,7 +396,6 @@ void QEMU_ManagerFrame::OnVmImageChange(wxFileDirPickerEvent& event)
     if(!pVm)
         return;
     pVm->SetImage(event.GetPath());
-    SetDirty();
 }
 
 void QEMU_ManagerFrame::OnVmMemoryChange(wxCommandEvent& event)
@@ -387,7 +406,6 @@ void QEMU_ManagerFrame::OnVmMemoryChange(wxCommandEvent& event)
     long lValue;
     event.GetString().ToLong(&lValue);
     pVm->SetMemory(lValue);
-    SetDirty();
 }
 
 void QEMU_ManagerFrame::OnVmParamsChange(wxCommandEvent& event)
@@ -396,7 +414,6 @@ void QEMU_ManagerFrame::OnVmParamsChange(wxCommandEvent& event)
     if(!pVm)
         return;
     pVm->SetParams(event.GetString());
-    SetDirty();
 }
 
 void QEMU_ManagerFrame::OnVmSystemChange(wxCommandEvent& event)
@@ -405,7 +422,6 @@ void QEMU_ManagerFrame::OnVmSystemChange(wxCommandEvent& event)
     if(!pVm)
         return;
     pVm->SetSystem(event.GetString());
-    SetDirty();
 }
 
 void QEMU_ManagerFrame::OnVmShowDisplayChange(wxCommandEvent& event)
@@ -414,15 +430,6 @@ void QEMU_ManagerFrame::OnVmShowDisplayChange(wxCommandEvent& event)
     if(!pVm)
         return;
     pVm->SetShowDisplay(event.IsChecked());
-    SetDirty();
-}
-
-void QEMU_ManagerFrame::SetDirty(bool bDirty)
-{
-    if(m_bIhibitDirty)
-        return;
-    m_pToolbar->EnableTool(ID_TOOLBAR_SAVE, bDirty);
-    m_bDirty = bDirty;
 }
 
 void QEMU_ManagerFrame::OnStartVm(wxCommandEvent& event)
@@ -430,11 +437,9 @@ void QEMU_ManagerFrame::OnStartVm(wxCommandEvent& event)
     QemuVm* pVm = GetSelectedVm();
     if(!pVm)
         return;
-    wxString sCommand = m_sQemuPath + "/qemu-system-" + pVm->GetSystem();
-    wxString sParameters = wxString::Format("-m %d -hda %s %s", pVm->GetMemory(), pVm->GetImage().c_str(), pVm->GetParams().c_str());
-    if(!(pVm->GetShowDisplay()))
-        sParameters += " -nographic";
-    long lPid = wxExecute(wxString::Format("%s %s", sCommand.c_str(), sParameters.c_str()).c_str(), wxEXEC_HIDE_CONSOLE);
+    pVm->Start();
+    EnableEdit(false);
+    m_pLblStatus->SetLabel("Starting...");
 }
 
 void QEMU_ManagerFrame::SaveScreen()
@@ -475,3 +480,33 @@ void QEMU_ManagerFrame::LoadScreen()
         Move(nX, nY);
 }
 
+
+void QEMU_ManagerFrame::OnStopVm(wxCommandEvent& event)
+{
+}
+
+void QEMU_ManagerFrame::OnKillVm(wxCommandEvent& event)
+{
+    QemuVm* pVm = GetSelectedVm();
+    if(!pVm)
+        return;
+    long lPid = pVm->GetPid();
+    if(lPid > 0)
+        wxProcess::Kill(lPid, wxSIGKILL);
+}
+
+void QEMU_ManagerFrame::OnTimer(wxTimerEvent& event)
+{
+    QemuVm* pVm = GetSelectedVm();
+    if(!pVm)
+        return;
+    bool bRunning = pVm->IsRunning();
+    EnableEdit(!bRunning);
+    wxString sStatus;
+    if(bRunning)
+        sStatus = wxString::Format("Running (PID: %d)", pVm->GetPid());
+    else
+        sStatus = "Stopped";
+    m_pLblStatus->SetLabel(sStatus);
+
+}

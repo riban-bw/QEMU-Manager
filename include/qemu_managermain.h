@@ -1,10 +1,10 @@
 /***************************************************************
- * Name:      QEMU_ManagerMain.h
+ * Name:      qemu_managermain.h
  * Purpose:   Defines Application Frame
  * Author:    Brian Walton (brian@riban.co.uk)
  * Created:   2020-01-23
  * Copyright: Brian Walton (riban.co.uk)
- * License:
+ * License:   GPL-V3
  **************************************************************/
 
 #ifndef QEMU_MANAGERMAIN_H
@@ -23,6 +23,7 @@
 #include <wx/stattext.h>
 #include <wx/statusbr.h>
 #include <wx/textctrl.h>
+#include <wx/timer.h>
 #include <wx/toolbar.h>
 //*)
 #include <vector>
@@ -53,6 +54,9 @@ class QEMU_ManagerFrame: public wxFrame
         void OnVmImageChange(wxFileDirPickerEvent& event);
         void OnStartVm(wxCommandEvent& event);
         void OnVmShowDisplayChange(wxCommandEvent& event);
+        void OnStopVm(wxCommandEvent& event);
+        void OnKillVm(wxCommandEvent& event);
+        void OnTimer(wxTimerEvent& event);
         //*)
 
         //(*Identifiers(QEMU_ManagerFrame)
@@ -70,9 +74,10 @@ class QEMU_ManagerFrame: public wxFrame
         static const long ID_CHECKBOX1;
         static const long ID_STATICTEXT5;
         static const long ID_TEXTCTRL4;
+        static const long ID_STATICTEXT7;
+        static const long ID_STATICTEXT8;
         static const long ID_SCROLLEDWINDOW2;
         static const long ID_SPLITTERWINDOW1;
-        static const long ID_MENU_SAVE;
         static const long idMenuQuit;
         static const long idMenuAbout;
         static const long ID_STATUSBAR1;
@@ -81,9 +86,9 @@ class QEMU_ManagerFrame: public wxFrame
         static const long ID_TOOLBAR_START;
         static const long ID_TOOLBAR_RESTART;
         static const long ID_TOOLBAR_STOP;
-        static const long ID_TOOLBAR_SAVE;
         static const long ID_TOOLBAR_PREFERENCES;
         static const long ID_TOOLBAR1;
+        static const long ID_TIMER;
         //*)
 
         //(*Declarations(QEMU_ManagerFrame)
@@ -91,7 +96,6 @@ class QEMU_ManagerFrame: public wxFrame
         wxChoice* m_pCmbSystem;
         wxFilePickerCtrl* m_pTxtImage;
         wxListBox* m_pLstVms;
-        wxMenuItem* MenuItem3;
         wxScrolledWindow* ScrolledWindow1;
         wxScrolledWindow* ScrolledWindow2;
         wxSplitterWindow* SplitterWindow1;
@@ -101,21 +105,23 @@ class QEMU_ManagerFrame: public wxFrame
         wxStaticText* StaticText4;
         wxStaticText* StaticText5;
         wxStaticText* StaticText6;
-        wxStatusBar* StatusBar1;
+        wxStaticText* StaticText7;
+        wxStaticText* m_pLblStatus;
+        wxStatusBar* m_pStatusbar;
         wxTextCtrl* m_pTxtMemory;
         wxTextCtrl* m_pTxtName;
         wxTextCtrl* m_pTxtParams;
+        wxTimer m_pTimer;
         wxToolBar* m_pToolbar;
         wxToolBarToolBase* m_pToolbtnDelete;
+        wxToolBarToolBase* m_pToolbtnKill;
         wxToolBarToolBase* m_pToolbtnNew;
         wxToolBarToolBase* m_pToolbtnPreferences;
         wxToolBarToolBase* m_pToolbtnRestart;
-        wxToolBarToolBase* m_pToolbtnSave;
         wxToolBarToolBase* m_pToolbtnStart;
-        wxToolBarToolBase* m_pToolbtnStop;
         //*)
 
-        /** Override the OnClose event
+        /** Handle Close event
         *   @param  event Close event
         */
         void OnClose(wxCloseEvent& event);
@@ -142,11 +148,6 @@ class QEMU_ManagerFrame: public wxFrame
         */
         QemuVm* GetSelectedVm();
 
-        /** Sets the dirty status
-        *   @param bDirty True to set dirty, false to set clean (Default: true)
-        */
-        void SetDirty(bool bDirty = true);
-
         /** Save current screen position and size
         */
         void SaveScreen();
@@ -155,12 +156,20 @@ class QEMU_ManagerFrame: public wxFrame
         */
         void LoadScreen();
 
+        /** Get the command line that will be executed
+        *   @param pVm Pointer to virtual machine (Default - Currently selected VM)
+        *   @retval wxString Command line used to launch VM
+        */
+        wxString GetCommand(QemuVm* pVm = NULL);
+
+        /** Enable or disable ability to edit VM parameters
+        *   @param  bEnable True to allow editing (Default: True)
+        */
+        void EnableEdit(bool bEnable = true);
+
         std::vector<QemuVm*> m_vVm; // List of VMs
         int m_nCurrentVm; // Index of currently selected VM within m_vVm or -1 for none selected
-        wxString m_sQemuPath;
         wxConfig* m_pConfig = NULL; // Pointer to the configuration
-        bool m_bDirty; // True if unsaved changes
-        bool m_bIhibitDirty = false; // True to indicate that dirty flag should not be altered
 
         DECLARE_EVENT_TABLE()
 };
