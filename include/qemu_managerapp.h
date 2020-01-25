@@ -4,7 +4,7 @@
  * Author:    Brian Walton (brian@riban.co.uk)
  * Created:   2020-01-23
  * Copyright: Brian Walton (riban.co.uk)
- * License:
+ * License:   GPL V3
  **************************************************************/
 
 #ifndef QEMU_MANAGERAPP_H

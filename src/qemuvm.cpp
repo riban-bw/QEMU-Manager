@@ -138,7 +138,7 @@ bool QemuVm::IsRunning(unsigned int nPid)
                 sProcess = wxString(pName);
             CloseHandle(handle);
         }
-        #elif
+        #else
         char* pName = (char*)calloc(PATH_MAX, sizeof(char));
         if(pName)
         {
@@ -150,7 +150,7 @@ bool QemuVm::IsRunning(unsigned int nPid)
                 nSize = fread(pName, sizeof(char), PATH_MAX, filePid);
                 if(nSize>0){
                     if('\n' == pName[nSize - 1])
-                        pName[size - 1] = '\0';
+                        pName[nSize - 1] = '\0';
                 }
                 fclose(filePid);
             }

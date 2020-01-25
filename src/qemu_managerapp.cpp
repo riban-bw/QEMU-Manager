@@ -4,13 +4,13 @@
  * Author:    Brian Walton (brian@riban.co.uk)
  * Created:   2020-01-23
  * Copyright: Brian Walton (riban.co.uk)
- * License:
+ * License:   GPL V3
  **************************************************************/
 
-#include "QEMU_ManagerApp.h"
+#include "qemu_managerapp.h"
 
 //(*AppHeaders
-#include "QEMU_ManagerMain.h"
+#include "qemu_managermain.h"
 #include <wx/image.h>
 //*)
 

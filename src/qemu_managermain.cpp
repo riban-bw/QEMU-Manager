@@ -7,7 +7,7 @@
  * License:   GPL-V3
  **************************************************************/
 
-#include "QEMU_ManagerMain.h"
+#include "qemu_managermain.h"
 #include <wx/msgdlg.h>
 #include <wx/dir.h>
 #include <wx/display.h>
@@ -107,7 +107,7 @@ QEMU_ManagerFrame::QEMU_ManagerFrame(wxWindow* parent,wxWindowID id)
     FlexGridSizer2->Add(m_pCmbSystem, 1, wxALL|wxEXPAND, 5);
     StaticText3 = new wxStaticText(ScrolledWindow2, ID_STATICTEXT3, _("Disk Image"), wxDefaultPosition, wxDefaultSize, 0, _T("ID_STATICTEXT3"));
     FlexGridSizer2->Add(StaticText3, 1, wxALL|wxALIGN_CENTER_HORIZONTAL|wxALIGN_CENTER_VERTICAL, 5);
-    m_pTxtImage = new wxFilePickerCtrl(ScrolledWindow2, ID_FILEPICKERCTRL1, wxEmptyString, _("Select disk image"), _T("Disk Images (*.qcow;*.qcow2;*.img;*.raw)|*.qcow;*.qcow2;*.img;*.raw|All files (*.*)|*.*"), wxDefaultPosition, wxDefaultSize, wxFLP_FILE_MUST_EXIST|wxFLP_OPEN|wxFLP_USE_TEXTCTRL, wxDefaultValidator, _T("ID_FILEPICKERCTRL1"));
+    m_pTxtImage = new wxFilePickerCtrl(ScrolledWindow2, ID_FILEPICKERCTRL1, wxEmptyString, _("Select disk image"), _T("Disk Images (*.qcow;*.qcow2;*.img;*.raw)|*.qcow;*.qcow2;*.img;*.raw|All files (*.*)|*.*"), wxDefaultPosition, wxDefaultSize, wxFLP_FILE_MUST_EXIST|wxFLP_OPEN, wxDefaultValidator, _T("ID_FILEPICKERCTRL1"));
     FlexGridSizer2->Add(m_pTxtImage, 1, wxALL|wxEXPAND, 5);
     StaticText4 = new wxStaticText(ScrolledWindow2, ID_STATICTEXT4, _("Memory (MB)"), wxDefaultPosition, wxDefaultSize, 0, _T("ID_STATICTEXT4"));
     FlexGridSizer2->Add(StaticText4, 1, wxALL|wxALIGN_CENTER_HORIZONTAL|wxALIGN_CENTER_VERTICAL, 5);
