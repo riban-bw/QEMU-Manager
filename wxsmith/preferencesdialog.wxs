@@ -18,6 +18,8 @@
 			<object class="sizeritem">
 				<object class="wxDirPickerCtrl" name="ID_DIRPICKERCTRL1" variable="m_pDirPicker" member="yes">
 					<message>Select QEMU path</message>
+					<style>wxDIRP_DIR_MUST_EXIST|wxDIRP_USE_TEXTCTRL</style>
+					<handler function="OnQemuPathChange" entry="EVT_DIRPICKER_CHANGED" />
 				</object>
 				<flag>wxALL|wxEXPAND</flag>
 				<border>5</border>

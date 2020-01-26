@@ -388,6 +388,19 @@ void QEMU_ManagerFrame::LoadConfig()
     if(!m_pConfig)
         m_pConfig = new wxConfig("qemumanager", "riban");
     m_pConfig->Read("QEMU/Path", &QemuVm::QEMU_PATH);
+    wxFileName fnTest(QemuVm::QEMU_PATH + "/qemu-img");
+
+    #ifdef __WXMSW__
+    fnTest.SetExt("exe");
+    #endif // __WXMSW__
+    while(!wxFileExists(fnTest.GetFullPath()))
+    {
+        int nResult = wxMessageBox("Please configure path to QEMU or CANCEL to close application.", "Configuration required", wxOK | wxCANCEL);
+        if(wxCANCEL == nResult)
+            Close();
+        PreferencesDialog(this, m_pConfig).ShowModal();
+        fnTest.SetPath(QemuVm::QEMU_PATH);
+    }
     wxString sKey;
     long lCookie;
     m_pConfig->SetPath("/VM");

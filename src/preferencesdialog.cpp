@@ -1,5 +1,6 @@
 #include "preferencesdialog.h"
 #include <wx/dirdlg.h>
+#include "qemuvm.h"
 
 //(*InternalHeaders(PreferencesDialog)
 #include <wx/intl.h>
@@ -36,6 +37,7 @@ PreferencesDialog::PreferencesDialog(wxWindow* parent, wxConfig* pConfig)
 	FlexGridSizer1->Fit(this);
 	FlexGridSizer1->SetSizeHints(this);
 
+	Connect(ID_DIRPICKERCTRL1,wxEVT_COMMAND_DIRPICKER_CHANGED,(wxObjectEventFunction)&PreferencesDialog::OnQemuPathChange);
 	Connect(ID_BUTTON2,wxEVT_COMMAND_BUTTON_CLICKED,(wxObjectEventFunction)&PreferencesDialog::OnButtonClose);
 	//*)
 
@@ -63,4 +65,5 @@ void PreferencesDialog::OnButtonClose(wxCommandEvent& event)
 void PreferencesDialog::OnQemuPathChange(wxFileDirPickerEvent& event)
 {
     m_pConfig->Write("QEMU/Path", event.GetPath());
+    QemuVm::QEMU_PATH = event.GetPath();
 }
