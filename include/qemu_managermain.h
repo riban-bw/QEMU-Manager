@@ -11,12 +11,15 @@
 #define QEMU_MANAGERMAIN_H
 
 //(*Headers(QEMU_ManagerFrame)
+#include <wx/button.h>
 #include <wx/checkbox.h>
 #include <wx/choice.h>
 #include <wx/filepicker.h>
 #include <wx/frame.h>
 #include <wx/listbox.h>
 #include <wx/menu.h>
+#include <wx/notebook.h>
+#include <wx/panel.h>
 #include <wx/scrolwin.h>
 #include <wx/sizer.h>
 #include <wx/splitter.h>
@@ -57,6 +60,10 @@ class QEMU_ManagerFrame: public wxFrame
         void OnStopVm(wxCommandEvent& event);
         void OnKillVm(wxCommandEvent& event);
         void OnTimer(wxTimerEvent& event);
+        void OnVmCdromChange(wxFileDirPickerEvent& event);
+        void OnNewHdd(wxCommandEvent& event);
+        void OnLogDClick(wxCommandEvent& event);
+        void OnEnableCdrom(wxCommandEvent& event);
         //*)
 
         //(*Identifiers(QEMU_ManagerFrame)
@@ -68,6 +75,10 @@ class QEMU_ManagerFrame: public wxFrame
         static const long ID_CHOICE1;
         static const long ID_STATICTEXT3;
         static const long ID_FILEPICKERCTRL1;
+        static const long ID_BUTTON_NEWHDD;
+        static const long ID_STATICTEXT9;
+        static const long ID_FILEPICKERCTRL2;
+        static const long ID_CHECKBOX2;
         static const long ID_STATICTEXT4;
         static const long ID_TEXTCTRL3;
         static const long ID_STATICTEXT6;
@@ -76,7 +87,10 @@ class QEMU_ManagerFrame: public wxFrame
         static const long ID_TEXTCTRL4;
         static const long ID_STATICTEXT7;
         static const long ID_STATICTEXT8;
-        static const long ID_SCROLLEDWINDOW2;
+        static const long ID_PANEL1;
+        static const long ID_LISTBOX2;
+        static const long ID_PANEL2;
+        static const long ID_NOTEBOOK1;
         static const long ID_SPLITTERWINDOW1;
         static const long idMenuQuit;
         static const long idMenuAbout;
@@ -92,13 +106,19 @@ class QEMU_ManagerFrame: public wxFrame
         //*)
 
         //(*Declarations(QEMU_ManagerFrame)
+        wxButton* m_pBtnNewHdd;
+        wxCheckBox* m_pChkEnableCdrom;
         wxCheckBox* m_pChkShowDisplay;
         wxChoice* m_pCmbSystem;
-        wxFilePickerCtrl* m_pTxtImage;
+        wxFilePickerCtrl* m_pFilePickerCdrom;
+        wxFilePickerCtrl* m_pFilePickerHdd;
+        wxListBox* m_pLstLog;
         wxListBox* m_pLstVms;
+        wxNotebook* Notebook1;
+        wxPanel* Panel2;
+        wxPanel* m_pPnlSettings;
         wxScrolledWindow* ScrolledWindow1;
-        wxScrolledWindow* ScrolledWindow2;
-        wxSplitterWindow* SplitterWindow1;
+        wxSplitterWindow* m_pSplitter;
         wxStaticText* StaticText1;
         wxStaticText* StaticText2;
         wxStaticText* StaticText3;
@@ -106,6 +126,7 @@ class QEMU_ManagerFrame: public wxFrame
         wxStaticText* StaticText5;
         wxStaticText* StaticText6;
         wxStaticText* StaticText7;
+        wxStaticText* StaticText8;
         wxStaticText* m_pLblStatus;
         wxStatusBar* m_pStatusbar;
         wxTextCtrl* m_pTxtMemory;
@@ -166,6 +187,17 @@ class QEMU_ManagerFrame: public wxFrame
         *   @param  bEnable True to allow editing (Default: True)
         */
         void EnableEdit(bool bEnable = true);
+
+        /** Get the next available API port, starting at 2001
+        *   @retval unsigned int Port number
+        */
+        unsigned int GetNextApiPort();
+
+        /** Get status text for a VM
+        *   @param  pVm Pointer to VM
+        *   @retval wxString Status text
+        */
+        wxString GetStatus(QemuVm* pVm);
 
         std::vector<QemuVm*> m_vVm; // List of VMs
         int m_nCurrentVm; // Index of currently selected VM within m_vVm or -1 for none selected

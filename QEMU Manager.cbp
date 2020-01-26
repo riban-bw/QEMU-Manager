@@ -5,34 +5,33 @@
 		<Option title="QEMU Manager" />
 		<Option pch_mode="2" />
 		<Option compiler="gcc" />
-		<MakeCommands>
-			<Build command="" />
-			<CompileFile command="" />
-			<Clean command="" />
-			<DistClean command="" />
-			<AskRebuildNeeded command="" />
-			<SilentBuild command=" &gt; $(CMD_NULL)" />
-		</MakeCommands>
 		<Build>
 			<Target title="MSW Debug">
 				<Option output="bin/Debug/QEMU Manager" prefix_auto="1" extension_auto="1" />
 				<Option object_output="obj/Debug/" />
 				<Option type="0" />
-				<Option compiler="gcc" />
+				<Option compiler="mingw_64" />
+				<Option projectCompilerOptionsRelation="1" />
 				<Option projectLinkerOptionsRelation="2" />
 				<Compiler>
 					<Add option="-g" />
+					<Add option="-pipe" />
+					<Add option="-mthreads" />
+					<Add option="-DWXUSINGDLL" />
+					<Add option="-DwxUSE_UNICODE" />
 					<Add option="-D__GNUWIN32__" />
 					<Add option="-D__WXMSW__" />
 					<Add option="-D__WXDEBUG__" />
 					<Add directory="$(#wx)/lib/gcc_dll/mswud" />
-					<Add directory="include" />
+					<Add directory="$(#wx)/include" />
 				</Compiler>
 				<ResourceCompiler>
+					<Add directory="$(#wx)/include" />
 					<Add directory="$(#wx)/lib/gcc_dll/mswud" />
 				</ResourceCompiler>
 				<Linker>
-					<Add library="libwxmsw31ud.a" />
+					<Add option="-mthreads" />
+					<Add library="wxmsw31ud" />
 					<Add directory="$(#wx)/lib/gcc_dll" />
 				</Linker>
 			</Target>
@@ -41,20 +40,28 @@
 				<Option object_output="obj/Release/" />
 				<Option type="0" />
 				<Option compiler="gcc" />
+				<Option projectCompilerOptionsRelation="1" />
 				<Option projectLinkerOptionsRelation="2" />
 				<Compiler>
 					<Add option="-O2" />
+					<Add option="-pipe" />
+					<Add option="-mthreads" />
+					<Add option="-DWXUSINGDLL" />
+					<Add option="-DwxUSE_UNICODE" />
 					<Add option="-D__GNUWIN32__" />
 					<Add option="-D__WXMSW__" />
 					<Add directory="$(#wx)/lib/gcc_dll/mswu" />
 					<Add directory="include" />
+					<Add directory="$(#wx)/include" />
 				</Compiler>
 				<ResourceCompiler>
+					<Add directory="$(#wx)/include" />
 					<Add directory="$(#wx)/lib/gcc_dll/mswu" />
 				</ResourceCompiler>
 				<Linker>
 					<Add option="-s" />
-					<Add library="libwxmsw31u.a" />
+					<Add option="-mthreads" />
+					<Add library="wxmsw31u" />
 					<Add directory="$(#wx)/lib/gcc_dll" />
 				</Linker>
 			</Target>
@@ -63,16 +70,15 @@
 				<Option object_output="obj/Debug/" />
 				<Option type="0" />
 				<Option compiler="gcc" />
+				<Option projectCompilerOptionsRelation="1" />
 				<Option projectLinkerOptionsRelation="2" />
 				<Compiler>
 					<Add option="-g" />
-					<Add option="`wx-config --cflags`" />
-					<Add option="-Wall" />
+					<Add option="`wx-config -cxxflags`" />
 					<Add option="-D__WXDEBUG__" />
-					<Add directory="./include" />
 				</Compiler>
 				<Linker>
-					<Add option="`wx-config -libs`" />
+					<Add option="`wx-config -libs" />
 				</Linker>
 			</Target>
 			<Target title="POSIX Release">
@@ -80,18 +86,27 @@
 				<Option object_output="obj/Release/" />
 				<Option type="0" />
 				<Option compiler="gcc" />
+				<Option projectCompilerOptionsRelation="1" />
 				<Option projectLinkerOptionsRelation="2" />
 				<Compiler>
 					<Add option="-O2" />
-					<Add option="`wx-config --cflags`" />
-					<Add option="-Wall" />
-					<Add directory="include" />
+					<Add option="`wx-config -cxxflags`" />
 				</Compiler>
+				<ResourceCompiler>
+					<Add directory="$(#wx)/lib/gcc_dll/mswu" />
+				</ResourceCompiler>
 				<Linker>
-					<Add option="`wx-config -libs`" />
+					<Add option="-s" />
+					<Add option="`wx-config -libs" />
+					<Add directory="$(#wx)/lib/gcc_dll" />
 				</Linker>
 			</Target>
 		</Build>
+		<Compiler>
+			<Add option="-Wall" />
+			<Add directory="include" />
+		</Compiler>
+		<Unit filename="include/newimage.h" />
 		<Unit filename="include/preferencesdialog.h" />
 		<Unit filename="include/qemu_managerapp.h" />
 		<Unit filename="include/qemu_managermain.h" />
@@ -99,10 +114,12 @@
 		<Unit filename="resource.rc">
 			<Option compilerVar="WINDRES" />
 		</Unit>
+		<Unit filename="src/newimage.cpp" />
 		<Unit filename="src/preferencesdialog.cpp" />
 		<Unit filename="src/qemu_managerapp.cpp" />
 		<Unit filename="src/qemu_managermain.cpp" />
 		<Unit filename="src/qemuvm.cpp" />
+		<Unit filename="wxsmith/newimage.wxs" />
 		<Unit filename="wxsmith/preferencesdialog.wxs" />
 		<Unit filename="wxsmith/qemu_managerframe.wxs" />
 		<Extensions>
@@ -115,6 +132,7 @@
 				<resources>
 					<wxFrame wxs="wxsmith/qemu_managerframe.wxs" src="src/qemu_managermain.cpp" hdr="include/qemu_managermain.h" fwddecl="0" i18n="1" name="QEMU_ManagerFrame" language="CPP" />
 					<wxDialog wxs="wxsmith/preferencesdialog.wxs" src="src/preferencesdialog.cpp" hdr="include/preferencesdialog.h" fwddecl="0" i18n="1" name="PreferencesDialog" language="CPP" />
+					<wxDialog wxs="wxsmith/newimage.wxs" src="src/newimage.cpp" hdr="include/newimage.h" fwddecl="0" i18n="1" name="NewImage" language="CPP" />
 				</resources>
 			</wxsmith>
 		</Extensions>

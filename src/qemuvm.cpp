@@ -16,7 +16,8 @@
 
 wxString QemuVm::QEMU_PATH = "";
 
-QemuVm::QemuVm()
+QemuVm::QemuVm(unsigned int nApiPort) :
+    m_nApiPort(nApiPort)
 {
 }
 
@@ -53,6 +54,16 @@ wxString QemuVm::GetImage()
 void QemuVm::SetImage(wxString sImage)
 {
     m_sImage = sImage;
+}
+
+wxString QemuVm::GetCdrom()
+{
+    return m_sCdrom;
+}
+
+void QemuVm::SetCdrom(wxString sImage)
+{
+    m_sCdrom = sImage;
 }
 
 unsigned int QemuVm::GetMemory()
@@ -94,11 +105,11 @@ void QemuVm::Start()
 {
     if(m_nPid)
         return;
-    wxString sCommand = wxString::Format("%s %s", GetCommand(true).c_str(), GetCommandParameters().c_str());
+    wxString sCommand = GetCommand(true, true);
     m_nPid = wxExecute(sCommand.c_str(), wxEXEC_HIDE_CONSOLE);
 }
 
-wxString QemuVm::GetCommand(bool bWithPath)
+wxString QemuVm::GetCommand(bool bWithPath, bool bWithParams)
 {
     wxString sFilename = "qemu-system-" + m_sSystem;
     #ifdef __WXMSW__
@@ -106,17 +117,25 @@ wxString QemuVm::GetCommand(bool bWithPath)
     #endif // __WXMSW__
     if(bWithPath)
         sFilename = wxFileName(QEMU_PATH + "/" + sFilename).GetFullPath();
+    if(bWithParams)
+        sFilename += " " + GetCommandParameters();
     return(sFilename);
 }
 
 wxString QemuVm::GetCommandParameters()
 {
-    wxString sParams = wxString::Format("%s -m %d %s",
-                                         m_sImage.c_str(),
+    wxString sParams = wxString::Format("-m %d -name \"%s\"",
                                          m_nMemory,
-                                         m_sParams.c_str());
+                                         m_sName.c_str());
+    if(m_nApiPort)
+        sParams += wxString::Format(" -qmp tcp:localhost:%d,server,nowait", m_nApiPort);
+    if(!m_sImage.IsEmpty())
+        sParams += " -hda " + m_sImage;
+    if(m_bCdromEnabled && !m_sCdrom.IsEmpty())
+        sParams += " -cdrom " + m_sCdrom;
     if(!m_bShowDisplay)
         sParams += " -nographic";
+    m_sParams += " " + m_sParams;
     return sParams;
 }
 
@@ -162,4 +181,19 @@ bool QemuVm::IsRunning(unsigned int nPid)
     if(!bRunning)
         m_nPid = 0;
     return bRunning;
+}
+
+void QemuVm::EnableCdrom(bool bEnable)
+{
+    m_bCdromEnabled= bEnable;
+}
+
+bool QemuVm::IsCdromEnabled()
+{
+    return m_bCdromEnabled;
+}
+
+unsigned int QemuVm::GetApiPort()
+{
+    return m_nApiPort;
 }

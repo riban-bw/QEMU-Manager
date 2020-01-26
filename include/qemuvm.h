@@ -12,7 +12,7 @@
 class QemuVm
 {
     public:
-        QemuVm();
+        QemuVm(unsigned int nApiPort = 0);
         virtual ~QemuVm();
 
         /** @brief  Get name of the VM
@@ -44,6 +44,16 @@ class QemuVm
         *   @param  sImage Disk image path and filename
         */
         void SetImage(wxString sImage);
+
+        /** @brief  Get CD ROM image full path and filename
+        *   @retval wxString CD ROM image path and filename
+        */
+        wxString GetCdrom();
+
+        /** @brief  Set CD ROM image full path and filename
+        *   @param  sImage CD ROM  image path and filename
+        */
+        void SetCdrom(wxString sImage);
 
         /** @brief  Get other arbitrary QEMU command line parameters
         *   @retval wxString Other parameters
@@ -85,10 +95,11 @@ class QemuVm
         void Start();
 
         /** @brief  Get the name of the qemu executable
-        *   @param  bWithPath True to return full path and filename
+        *   @param  bWithPath True to return full path and filename (Default: false)
+        *   @param  bWithParams True to return command line parameters appended to command (Default: false)
         *   @retval wxString QEMU executable
         */
-        wxString GetCommand(bool bWithPath = false);
+        wxString GetCommand(bool bWithPath = false, bool bWithParams = false);
 
         /** @brief  Get the command line parameters for QEMU
         *   @retval wxString Command line parameters
@@ -101,6 +112,21 @@ class QemuVm
         */
         bool IsRunning(unsigned int nPid = 0);
 
+        /** @brief  Enables / disables CD ROM
+        *   @param  bEnable True to enable CD ROM (Default: true)
+        */
+        void EnableCdrom(bool bEnable = true);
+
+        /** @brief  Check if CD ROM is enabled
+        *   @retval bool True if CD ROM enabled
+        */
+        bool IsCdromEnabled();
+
+        /** @brief  Get API port number
+        *   @retval unsigned int API port number
+        */
+        unsigned int GetApiPort();
+
         static wxString QEMU_PATH;
 
     protected:
@@ -109,9 +135,12 @@ class QemuVm
         wxString m_sName = "New VM";
         wxString m_sSystem = "i386";
         wxString m_sImage;
+        wxString m_sCdrom;
         unsigned int m_nMemory = 512;
         wxString m_sParams;
         bool m_bShowDisplay = true;
         unsigned int m_nPid = 0;
+        unsigned int m_nApiPort;
+        bool m_bCdromEnabled = true;
 };
 

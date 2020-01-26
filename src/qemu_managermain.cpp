@@ -15,6 +15,9 @@
 #include "preferencesdialog.h"
 #include "icon.xpm"
 #include <wx/process.h>
+#include "newimage.h"
+#include <wx/clipbrd.h>
+#include <list>
 
 using namespace std;
 
@@ -36,6 +39,10 @@ const long QEMU_ManagerFrame::ID_STATICTEXT2 = wxNewId();
 const long QEMU_ManagerFrame::ID_CHOICE1 = wxNewId();
 const long QEMU_ManagerFrame::ID_STATICTEXT3 = wxNewId();
 const long QEMU_ManagerFrame::ID_FILEPICKERCTRL1 = wxNewId();
+const long QEMU_ManagerFrame::ID_BUTTON_NEWHDD = wxNewId();
+const long QEMU_ManagerFrame::ID_STATICTEXT9 = wxNewId();
+const long QEMU_ManagerFrame::ID_FILEPICKERCTRL2 = wxNewId();
+const long QEMU_ManagerFrame::ID_CHECKBOX2 = wxNewId();
 const long QEMU_ManagerFrame::ID_STATICTEXT4 = wxNewId();
 const long QEMU_ManagerFrame::ID_TEXTCTRL3 = wxNewId();
 const long QEMU_ManagerFrame::ID_STATICTEXT6 = wxNewId();
@@ -44,7 +51,10 @@ const long QEMU_ManagerFrame::ID_STATICTEXT5 = wxNewId();
 const long QEMU_ManagerFrame::ID_TEXTCTRL4 = wxNewId();
 const long QEMU_ManagerFrame::ID_STATICTEXT7 = wxNewId();
 const long QEMU_ManagerFrame::ID_STATICTEXT8 = wxNewId();
-const long QEMU_ManagerFrame::ID_SCROLLEDWINDOW2 = wxNewId();
+const long QEMU_ManagerFrame::ID_PANEL1 = wxNewId();
+const long QEMU_ManagerFrame::ID_LISTBOX2 = wxNewId();
+const long QEMU_ManagerFrame::ID_PANEL2 = wxNewId();
+const long QEMU_ManagerFrame::ID_NOTEBOOK1 = wxNewId();
 const long QEMU_ManagerFrame::ID_SPLITTERWINDOW1 = wxNewId();
 const long QEMU_ManagerFrame::idMenuQuit = wxNewId();
 const long QEMU_ManagerFrame::idMenuAbout = wxNewId();
@@ -68,6 +78,7 @@ END_EVENT_TABLE()
 QEMU_ManagerFrame::QEMU_ManagerFrame(wxWindow* parent,wxWindowID id)
 {
     //(*Initialize(QEMU_ManagerFrame)
+    wxBoxSizer* BoxSizer1;
     wxFlexGridSizer* FlexGridSizer2;
     wxFlexGridSizer* FlexGridSizer3;
     wxMenu* Menu1;
@@ -82,10 +93,10 @@ QEMU_ManagerFrame::QEMU_ManagerFrame(wxWindow* parent,wxWindowID id)
     	FrameIcon.CopyFromBitmap(icon);
     	SetIcon(FrameIcon);
     }
-    SplitterWindow1 = new wxSplitterWindow(this, ID_SPLITTERWINDOW1, wxPoint(152,216), wxDefaultSize, wxSP_3D, _T("ID_SPLITTERWINDOW1"));
-    SplitterWindow1->SetMinimumPaneSize(10);
-    SplitterWindow1->SetSashGravity(0.5);
-    ScrolledWindow1 = new wxScrolledWindow(SplitterWindow1, ID_SCROLLEDWINDOW1, wxPoint(144,286), wxDefaultSize, wxVSCROLL|wxHSCROLL, _T("ID_SCROLLEDWINDOW1"));
+    m_pSplitter = new wxSplitterWindow(this, ID_SPLITTERWINDOW1, wxPoint(152,216), wxDefaultSize, wxSP_3D, _T("ID_SPLITTERWINDOW1"));
+    m_pSplitter->SetMinimumPaneSize(10);
+    m_pSplitter->SetSashGravity(0.5);
+    ScrolledWindow1 = new wxScrolledWindow(m_pSplitter, ID_SCROLLEDWINDOW1, wxPoint(144,286), wxDefaultSize, wxVSCROLL|wxHSCROLL, _T("ID_SCROLLEDWINDOW1"));
     FlexGridSizer3 = new wxFlexGridSizer(0, 1, 0, 0);
     FlexGridSizer3->AddGrowableCol(0);
     FlexGridSizer3->AddGrowableRow(0);
@@ -94,43 +105,68 @@ QEMU_ManagerFrame::QEMU_ManagerFrame(wxWindow* parent,wxWindowID id)
     ScrolledWindow1->SetSizer(FlexGridSizer3);
     FlexGridSizer3->Fit(ScrolledWindow1);
     FlexGridSizer3->SetSizeHints(ScrolledWindow1);
-    ScrolledWindow2 = new wxScrolledWindow(SplitterWindow1, ID_SCROLLEDWINDOW2, wxDefaultPosition, wxDefaultSize, wxVSCROLL|wxHSCROLL, _T("ID_SCROLLEDWINDOW2"));
-    FlexGridSizer2 = new wxFlexGridSizer(0, 2, 0, 0);
+    Notebook1 = new wxNotebook(m_pSplitter, ID_NOTEBOOK1, wxDefaultPosition, wxDefaultSize, 0, _T("ID_NOTEBOOK1"));
+    m_pPnlSettings = new wxPanel(Notebook1, ID_PANEL1, wxDefaultPosition, wxDefaultSize, wxTAB_TRAVERSAL, _T("ID_PANEL1"));
+    FlexGridSizer2 = new wxFlexGridSizer(0, 3, 0, 0);
     FlexGridSizer2->AddGrowableCol(1);
-    StaticText1 = new wxStaticText(ScrolledWindow2, ID_STATICTEXT1, _("Name"), wxDefaultPosition, wxDefaultSize, wxALIGN_RIGHT|wxALIGN_CENTRE, _T("ID_STATICTEXT1"));
+    StaticText1 = new wxStaticText(m_pPnlSettings, ID_STATICTEXT1, _("Name"), wxDefaultPosition, wxDefaultSize, wxALIGN_RIGHT|wxALIGN_CENTRE, _T("ID_STATICTEXT1"));
     FlexGridSizer2->Add(StaticText1, 1, wxALL|wxEXPAND, 5);
-    m_pTxtName = new wxTextCtrl(ScrolledWindow2, ID_TEXTCTRL1, wxEmptyString, wxDefaultPosition, wxDefaultSize, 0, wxDefaultValidator, _T("ID_TEXTCTRL1"));
+    m_pTxtName = new wxTextCtrl(m_pPnlSettings, ID_TEXTCTRL1, wxEmptyString, wxDefaultPosition, wxDefaultSize, 0, wxDefaultValidator, _T("ID_TEXTCTRL1"));
     FlexGridSizer2->Add(m_pTxtName, 1, wxALL|wxEXPAND, 5);
-    StaticText2 = new wxStaticText(ScrolledWindow2, ID_STATICTEXT2, _("System"), wxDefaultPosition, wxDefaultSize, 0, _T("ID_STATICTEXT2"));
+    FlexGridSizer2->Add(-1,-1,1, wxALL|wxALIGN_CENTER_HORIZONTAL|wxALIGN_CENTER_VERTICAL, 5);
+    StaticText2 = new wxStaticText(m_pPnlSettings, ID_STATICTEXT2, _("System"), wxDefaultPosition, wxDefaultSize, 0, _T("ID_STATICTEXT2"));
     FlexGridSizer2->Add(StaticText2, 1, wxALL|wxALIGN_CENTER_HORIZONTAL|wxALIGN_CENTER_VERTICAL, 5);
-    m_pCmbSystem = new wxChoice(ScrolledWindow2, ID_CHOICE1, wxDefaultPosition, wxDefaultSize, 0, 0, 0, wxDefaultValidator, _T("ID_CHOICE1"));
+    m_pCmbSystem = new wxChoice(m_pPnlSettings, ID_CHOICE1, wxDefaultPosition, wxDefaultSize, 0, 0, 0, wxDefaultValidator, _T("ID_CHOICE1"));
     FlexGridSizer2->Add(m_pCmbSystem, 1, wxALL|wxEXPAND, 5);
-    StaticText3 = new wxStaticText(ScrolledWindow2, ID_STATICTEXT3, _("Disk Image"), wxDefaultPosition, wxDefaultSize, 0, _T("ID_STATICTEXT3"));
+    FlexGridSizer2->Add(-1,-1,1, wxALL|wxALIGN_CENTER_HORIZONTAL|wxALIGN_CENTER_VERTICAL, 5);
+    StaticText3 = new wxStaticText(m_pPnlSettings, ID_STATICTEXT3, _("Disk Image"), wxDefaultPosition, wxDefaultSize, 0, _T("ID_STATICTEXT3"));
     FlexGridSizer2->Add(StaticText3, 1, wxALL|wxALIGN_CENTER_HORIZONTAL|wxALIGN_CENTER_VERTICAL, 5);
-    m_pTxtImage = new wxFilePickerCtrl(ScrolledWindow2, ID_FILEPICKERCTRL1, wxEmptyString, _("Select disk image"), _T("Disk Images (*.qcow;*.qcow2;*.img;*.raw)|*.qcow;*.qcow2;*.img;*.raw|All files (*.*)|*.*"), wxDefaultPosition, wxDefaultSize, wxFLP_FILE_MUST_EXIST|wxFLP_OPEN, wxDefaultValidator, _T("ID_FILEPICKERCTRL1"));
-    FlexGridSizer2->Add(m_pTxtImage, 1, wxALL|wxEXPAND, 5);
-    StaticText4 = new wxStaticText(ScrolledWindow2, ID_STATICTEXT4, _("Memory (MB)"), wxDefaultPosition, wxDefaultSize, 0, _T("ID_STATICTEXT4"));
+    m_pFilePickerHdd = new wxFilePickerCtrl(m_pPnlSettings, ID_FILEPICKERCTRL1, wxEmptyString, _("Select disk image"), _T("Disk Images (*.qcow;*.qcow2;*.img;*.raw)|*.qcow;*.qcow2;*.img;*.raw|All files (*.*)|*.*"), wxDefaultPosition, wxDefaultSize, wxFLP_FILE_MUST_EXIST|wxFLP_OPEN|wxFLP_USE_TEXTCTRL, wxDefaultValidator, _T("ID_FILEPICKERCTRL1"));
+    FlexGridSizer2->Add(m_pFilePickerHdd, 1, wxALL|wxEXPAND, 5);
+    m_pBtnNewHdd = new wxButton(m_pPnlSettings, ID_BUTTON_NEWHDD, _("New"), wxDefaultPosition, wxSize(35,23), 0, wxDefaultValidator, _T("ID_BUTTON_NEWHDD"));
+    FlexGridSizer2->Add(m_pBtnNewHdd, 1, wxALL|wxEXPAND, 5);
+    StaticText8 = new wxStaticText(m_pPnlSettings, ID_STATICTEXT9, _("CDROM Image"), wxDefaultPosition, wxDefaultSize, 0, _T("ID_STATICTEXT9"));
+    FlexGridSizer2->Add(StaticText8, 1, wxALL|wxALIGN_CENTER_HORIZONTAL|wxALIGN_CENTER_VERTICAL, 5);
+    m_pFilePickerCdrom = new wxFilePickerCtrl(m_pPnlSettings, ID_FILEPICKERCTRL2, wxEmptyString, _("Select disk image"), _T("ISO Images (*.iso)|*.iso|All files (*.*)|*.*"), wxDefaultPosition, wxDefaultSize, wxFLP_FILE_MUST_EXIST|wxFLP_OPEN|wxFLP_USE_TEXTCTRL, wxDefaultValidator, _T("ID_FILEPICKERCTRL2"));
+    FlexGridSizer2->Add(m_pFilePickerCdrom, 1, wxALL|wxEXPAND, 5);
+    m_pChkEnableCdrom = new wxCheckBox(m_pPnlSettings, ID_CHECKBOX2, _("Enable"), wxDefaultPosition, wxDefaultSize, 0, wxDefaultValidator, _T("ID_CHECKBOX2"));
+    m_pChkEnableCdrom->SetValue(false);
+    FlexGridSizer2->Add(m_pChkEnableCdrom, 1, wxALL|wxALIGN_CENTER_HORIZONTAL|wxALIGN_CENTER_VERTICAL, 5);
+    StaticText4 = new wxStaticText(m_pPnlSettings, ID_STATICTEXT4, _("Memory (MB)"), wxDefaultPosition, wxDefaultSize, 0, _T("ID_STATICTEXT4"));
     FlexGridSizer2->Add(StaticText4, 1, wxALL|wxALIGN_CENTER_HORIZONTAL|wxALIGN_CENTER_VERTICAL, 5);
-    m_pTxtMemory = new wxTextCtrl(ScrolledWindow2, ID_TEXTCTRL3, wxEmptyString, wxDefaultPosition, wxDefaultSize, 0, wxDefaultValidator, _T("ID_TEXTCTRL3"));
+    m_pTxtMemory = new wxTextCtrl(m_pPnlSettings, ID_TEXTCTRL3, wxEmptyString, wxDefaultPosition, wxDefaultSize, 0, wxDefaultValidator, _T("ID_TEXTCTRL3"));
     FlexGridSizer2->Add(m_pTxtMemory, 1, wxALL|wxEXPAND, 5);
-    StaticText6 = new wxStaticText(ScrolledWindow2, ID_STATICTEXT6, _("Show Display"), wxDefaultPosition, wxDefaultSize, 0, _T("ID_STATICTEXT6"));
+    FlexGridSizer2->Add(-1,-1,1, wxALL|wxALIGN_CENTER_HORIZONTAL|wxALIGN_CENTER_VERTICAL, 5);
+    StaticText6 = new wxStaticText(m_pPnlSettings, ID_STATICTEXT6, _("Show Display"), wxDefaultPosition, wxDefaultSize, 0, _T("ID_STATICTEXT6"));
     FlexGridSizer2->Add(StaticText6, 1, wxALL|wxALIGN_CENTER_HORIZONTAL|wxALIGN_CENTER_VERTICAL, 5);
-    m_pChkShowDisplay = new wxCheckBox(ScrolledWindow2, ID_CHECKBOX1, wxEmptyString, wxDefaultPosition, wxDefaultSize, 0, wxDefaultValidator, _T("ID_CHECKBOX1"));
+    m_pChkShowDisplay = new wxCheckBox(m_pPnlSettings, ID_CHECKBOX1, wxEmptyString, wxDefaultPosition, wxDefaultSize, 0, wxDefaultValidator, _T("ID_CHECKBOX1"));
     m_pChkShowDisplay->SetValue(true);
     FlexGridSizer2->Add(m_pChkShowDisplay, 1, wxALL|wxEXPAND, 5);
-    StaticText5 = new wxStaticText(ScrolledWindow2, ID_STATICTEXT5, _("Other parameters"), wxDefaultPosition, wxDefaultSize, 0, _T("ID_STATICTEXT5"));
+    FlexGridSizer2->Add(-1,-1,1, wxALL|wxALIGN_CENTER_HORIZONTAL|wxALIGN_CENTER_VERTICAL, 5);
+    StaticText5 = new wxStaticText(m_pPnlSettings, ID_STATICTEXT5, _("Other parameters"), wxDefaultPosition, wxDefaultSize, 0, _T("ID_STATICTEXT5"));
     FlexGridSizer2->Add(StaticText5, 1, wxALL|wxALIGN_CENTER_HORIZONTAL|wxALIGN_CENTER_VERTICAL, 5);
-    m_pTxtParams = new wxTextCtrl(ScrolledWindow2, ID_TEXTCTRL4, wxEmptyString, wxDefaultPosition, wxDefaultSize, 0, wxDefaultValidator, _T("ID_TEXTCTRL4"));
+    m_pTxtParams = new wxTextCtrl(m_pPnlSettings, ID_TEXTCTRL4, wxEmptyString, wxDefaultPosition, wxDefaultSize, 0, wxDefaultValidator, _T("ID_TEXTCTRL4"));
     FlexGridSizer2->Add(m_pTxtParams, 1, wxALL|wxEXPAND, 5);
-    StaticText7 = new wxStaticText(ScrolledWindow2, ID_STATICTEXT7, _("Status"), wxDefaultPosition, wxDefaultSize, 0, _T("ID_STATICTEXT7"));
+    FlexGridSizer2->Add(-1,-1,1, wxALL|wxALIGN_CENTER_HORIZONTAL|wxALIGN_CENTER_VERTICAL, 5);
+    StaticText7 = new wxStaticText(m_pPnlSettings, ID_STATICTEXT7, _("Status"), wxDefaultPosition, wxDefaultSize, 0, _T("ID_STATICTEXT7"));
     FlexGridSizer2->Add(StaticText7, 1, wxALL|wxALIGN_CENTER_HORIZONTAL|wxALIGN_CENTER_VERTICAL, 5);
-    m_pLblStatus = new wxStaticText(ScrolledWindow2, ID_STATICTEXT8, _("Unknown"), wxDefaultPosition, wxDefaultSize, 0, _T("ID_STATICTEXT8"));
+    m_pLblStatus = new wxStaticText(m_pPnlSettings, ID_STATICTEXT8, _("Unknown"), wxDefaultPosition, wxDefaultSize, 0, _T("ID_STATICTEXT8"));
     FlexGridSizer2->Add(m_pLblStatus, 1, wxALL|wxEXPAND, 5);
-    ScrolledWindow2->SetSizer(FlexGridSizer2);
-    FlexGridSizer2->Fit(ScrolledWindow2);
-    FlexGridSizer2->SetSizeHints(ScrolledWindow2);
-    SplitterWindow1->SplitVertically(ScrolledWindow1, ScrolledWindow2);
-    SplitterWindow1->SetSashPosition(100);
+    FlexGridSizer2->Add(-1,-1,1, wxALL|wxALIGN_CENTER_HORIZONTAL|wxALIGN_CENTER_VERTICAL, 5);
+    m_pPnlSettings->SetSizer(FlexGridSizer2);
+    FlexGridSizer2->Fit(m_pPnlSettings);
+    FlexGridSizer2->SetSizeHints(m_pPnlSettings);
+    Panel2 = new wxPanel(Notebook1, ID_PANEL2, wxDefaultPosition, wxDefaultSize, wxTAB_TRAVERSAL, _T("ID_PANEL2"));
+    BoxSizer1 = new wxBoxSizer(wxHORIZONTAL);
+    m_pLstLog = new wxListBox(Panel2, ID_LISTBOX2, wxDefaultPosition, wxDefaultSize, 0, 0, 0, wxDefaultValidator, _T("ID_LISTBOX2"));
+    BoxSizer1->Add(m_pLstLog, 1, wxALL|wxEXPAND, 5);
+    Panel2->SetSizer(BoxSizer1);
+    BoxSizer1->Fit(Panel2);
+    BoxSizer1->SetSizeHints(Panel2);
+    Notebook1->AddPage(m_pPnlSettings, _("Settings"), false);
+    Notebook1->AddPage(Panel2, _("Log"), false);
+    m_pSplitter->SplitVertically(ScrolledWindow1, Notebook1);
+    m_pSplitter->SetSashPosition(100);
     MenuBar1 = new wxMenuBar();
     Menu1 = new wxMenu();
     MenuItem1 = new wxMenuItem(Menu1, idMenuQuit, _("Quit\tAlt-F4"), _("Quit the application"), wxITEM_NORMAL);
@@ -163,9 +199,13 @@ QEMU_ManagerFrame::QEMU_ManagerFrame(wxWindow* parent,wxWindowID id)
     Connect(ID_TEXTCTRL1,wxEVT_COMMAND_TEXT_UPDATED,(wxObjectEventFunction)&QEMU_ManagerFrame::OnVmNameChange);
     Connect(ID_CHOICE1,wxEVT_COMMAND_CHOICE_SELECTED,(wxObjectEventFunction)&QEMU_ManagerFrame::OnVmSystemChange);
     Connect(ID_FILEPICKERCTRL1,wxEVT_COMMAND_FILEPICKER_CHANGED,(wxObjectEventFunction)&QEMU_ManagerFrame::OnVmImageChange);
+    Connect(ID_BUTTON_NEWHDD,wxEVT_COMMAND_BUTTON_CLICKED,(wxObjectEventFunction)&QEMU_ManagerFrame::OnNewHdd);
+    Connect(ID_FILEPICKERCTRL2,wxEVT_COMMAND_FILEPICKER_CHANGED,(wxObjectEventFunction)&QEMU_ManagerFrame::OnVmCdromChange);
+    Connect(ID_CHECKBOX2,wxEVT_COMMAND_CHECKBOX_CLICKED,(wxObjectEventFunction)&QEMU_ManagerFrame::OnEnableCdrom);
     Connect(ID_TEXTCTRL3,wxEVT_COMMAND_TEXT_UPDATED,(wxObjectEventFunction)&QEMU_ManagerFrame::OnVmMemoryChange);
     Connect(ID_CHECKBOX1,wxEVT_COMMAND_CHECKBOX_CLICKED,(wxObjectEventFunction)&QEMU_ManagerFrame::OnVmShowDisplayChange);
     Connect(ID_TEXTCTRL4,wxEVT_COMMAND_TEXT_UPDATED,(wxObjectEventFunction)&QEMU_ManagerFrame::OnVmParamsChange);
+    Connect(ID_LISTBOX2,wxEVT_COMMAND_LISTBOX_SELECTED,(wxObjectEventFunction)&QEMU_ManagerFrame::OnLogDClick);
     Connect(idMenuQuit,wxEVT_COMMAND_MENU_SELECTED,(wxObjectEventFunction)&QEMU_ManagerFrame::OnQuit);
     Connect(idMenuAbout,wxEVT_COMMAND_MENU_SELECTED,(wxObjectEventFunction)&QEMU_ManagerFrame::OnAbout);
     Connect(ID_TOOLBAR_NEW,wxEVT_COMMAND_TOOL_CLICKED,(wxObjectEventFunction)&QEMU_ManagerFrame::OnNewVm);
@@ -211,7 +251,7 @@ void QEMU_ManagerFrame::OnAbout(wxCommandEvent& event)
 
 void QEMU_ManagerFrame::OnNewVm(wxCommandEvent& event)
 {
-    QemuVm* pVm = new QemuVm();
+    QemuVm* pVm = new QemuVm(GetNextApiPort());
     m_vVm.push_back(pVm);
     m_nCurrentVm = m_vVm.size() - 1;
     RefreshVmList();
@@ -226,6 +266,8 @@ void QEMU_ManagerFrame::RefreshVmList()
         QemuVm* pVm = *it;
         m_pLstVms->Append(pVm->GetName(), pVm);
     }
+    while(m_nCurrentVm >= (int)m_pLstVms->GetCount())
+        --m_nCurrentVm;
     m_pLstVms->Select(m_nCurrentVm);
 }
 
@@ -243,7 +285,6 @@ void QEMU_ManagerFrame::DeleteVm(QemuVm* pVm)
     if(it == m_vVm.end())
         return;
     m_vVm.erase(it);
-    m_nCurrentVm = m_vVm.size() - 1; //!@todo Only do this if vm selected or at end of list
     RefreshVmList();
     if(m_pConfig)
         m_pConfig->DeleteGroup(pVm->GetName());
@@ -272,28 +313,38 @@ void QEMU_ManagerFrame::OnVmSelect(wxCommandEvent& event)
     m_nCurrentVm = nSelection;
     m_pTxtName->SetValue(pVm->GetName());
     m_pTxtParams->SetValue(pVm->GetParams());
-    m_pTxtImage->SetPath(pVm->GetImage());
+    m_pFilePickerHdd->SetPath(pVm->GetImage());
+    m_pFilePickerCdrom->SetPath(pVm->GetCdrom());
     m_pTxtMemory->SetValue(wxString::Format("%d", pVm->GetMemory()));
     m_pCmbSystem->SetSelection(m_pCmbSystem->FindString(pVm->GetSystem()));
     m_pChkShowDisplay->SetValue(pVm->GetShowDisplay());
     bool bRunning = pVm->IsRunning();
     EnableEdit(!bRunning);
-    wxString sStatus;
-    if(bRunning)
-        sStatus = wxString::Format("Running (PID: %d)", pVm->GetPid());
+    m_pLblStatus->SetLabel(GetStatus(pVm));
+}
+
+
+wxString QEMU_ManagerFrame::GetStatus(QemuVm* pVm)
+{
+    if(!pVm)
+        return "Unknown";
+    if(pVm->IsRunning())
+        return wxString::Format("Running (PID: %d, QAPI: %d)", pVm->GetPid(), pVm->GetApiPort());
     else
-        sStatus = "Stopped";
-    m_pLblStatus->SetLabel(sStatus);
+        return wxString::Format("Stopped (QAPI: %d)", pVm->GetApiPort());
 }
 
 void QEMU_ManagerFrame::EnableEdit(bool bEnable)
 {
-    m_pTxtName->Enable(bEnable);
-    m_pTxtParams->Enable(bEnable);
-    m_pTxtImage->Enable(bEnable);
-    m_pTxtMemory->Enable(bEnable);
-    m_pCmbSystem->Enable(bEnable);
-    m_pChkShowDisplay->Enable(bEnable);
+    wxWindowList & children = m_pPnlSettings->GetChildren();
+    for(wxWindowList::Node* pNode = children.GetFirst(); pNode; pNode = pNode->GetNext())
+    {
+        wxWindow* pWindow = dynamic_cast<wxWindow*>(pNode->GetData());
+        if(pWindow)
+            pWindow->Enable(bEnable);
+    }
+    m_pFilePickerCdrom->Enable(bEnable && m_pChkEnableCdrom->GetValue());
+    return;
 }
 
 void QEMU_ManagerFrame::SaveVm(QemuVm* pVm)
@@ -301,13 +352,35 @@ void QEMU_ManagerFrame::SaveVm(QemuVm* pVm)
     if(!pVm || !m_pConfig)
         return;
     m_pConfig->SetPath("/VM");
-    m_pConfig->Write(wxString::Format("%s/name", pVm->GetName().c_str()), pVm->GetName());
-    m_pConfig->Write(wxString::Format("%s/system", pVm->GetName().c_str()), pVm->GetSystem());
-    m_pConfig->Write(wxString::Format("%s/image", pVm->GetName().c_str()), pVm->GetImage());
-    m_pConfig->Write(wxString::Format("%s/memory", pVm->GetName().c_str()), pVm->GetMemory());
-    m_pConfig->Write(wxString::Format("%s/showdisplay", pVm->GetName().c_str()), pVm->GetShowDisplay());
-    m_pConfig->Write(wxString::Format("%s/params", pVm->GetName().c_str()), pVm->GetParams());
-    m_pConfig->Write(wxString::Format("%s/pid", pVm->GetName().c_str()), pVm->GetPid());
+    m_pConfig->Write(wxString::Format("%s-%d/apiport", pVm->GetName().c_str(), pVm->GetApiPort()), pVm->GetApiPort());
+    m_pConfig->Write(wxString::Format("%s-%d/name", pVm->GetName().c_str(), pVm->GetApiPort()), pVm->GetName());
+    m_pConfig->Write(wxString::Format("%s-%d/system", pVm->GetName().c_str(), pVm->GetApiPort()), pVm->GetSystem());
+    m_pConfig->Write(wxString::Format("%s-%d/image", pVm->GetName().c_str(), pVm->GetApiPort()), pVm->GetImage());
+    m_pConfig->Write(wxString::Format("%s-%d/cdrom", pVm->GetName().c_str(), pVm->GetApiPort()), pVm->GetCdrom());
+    m_pConfig->Write(wxString::Format("%s-%d/memory", pVm->GetName().c_str(), pVm->GetApiPort()), pVm->GetMemory());
+    m_pConfig->Write(wxString::Format("%s-%d/showdisplay", pVm->GetName().c_str(), pVm->GetApiPort()), pVm->GetShowDisplay());
+    m_pConfig->Write(wxString::Format("%s-%d/params", pVm->GetName().c_str(), pVm->GetApiPort()), pVm->GetParams());
+    m_pConfig->Write(wxString::Format("%s-%d/pid", pVm->GetName().c_str(), pVm->GetApiPort()), pVm->GetPid());
+    m_pConfig->Write(wxString::Format("%s-%d/enablecdrom", pVm->GetName().c_str(), pVm->GetApiPort()), pVm->IsCdromEnabled());
+}
+
+unsigned int QEMU_ManagerFrame::GetNextApiPort()
+{
+    list<unsigned int> lPorts;
+    for(unsigned int nIndex = 0; nIndex < m_pLstVms->GetCount(); ++ nIndex)
+    {
+        QemuVm* pVm = (QemuVm*)m_pLstVms->GetClientData(nIndex);
+        lPorts.push_back(pVm->GetApiPort());
+    }
+    lPorts.sort(); //Sorted list of allocated port numbers
+    unsigned int nPrevious = 2000;
+    for(auto it = lPorts.begin(); it != lPorts.end(); ++it)
+    {
+        if(*it > nPrevious + 1)
+            return nPrevious + 1; // more than one between this and previous so use previous + 1
+        nPrevious = *it;
+    }
+    return nPrevious + 1;
 }
 
 void QEMU_ManagerFrame::LoadConfig()
@@ -319,18 +392,24 @@ void QEMU_ManagerFrame::LoadConfig()
     long lCookie;
     m_pConfig->SetPath("/VM");
     bool bMoreGroups = m_pConfig->GetFirstGroup(sKey, lCookie);
+    unsigned int nNextApiPort = 2001;
     while(bMoreGroups)
     {
         wxString sValue;
         long lValue;
         bool bValue;
-        QemuVm* pVm = new QemuVm();
+        m_pConfig->Read(sKey + "/apiport", &lValue);
+        QemuVm* pVm = new QemuVm(lValue);
         m_pConfig->Read(sKey + "/name", &sValue);
         pVm->SetName(sValue);
         m_pConfig->Read(sKey + "/system", &sValue);
         pVm->SetSystem(sValue);
         m_pConfig->Read(sKey + "/image", &sValue);
         pVm->SetImage(sValue);
+        m_pConfig->Read(sKey + "/cdrom", &sValue);
+        pVm->SetCdrom(sValue);
+        m_pConfig->Read(sKey + "/enablecdrom", &bValue, false);
+        pVm->EnableCdrom(bValue);
         m_pConfig->Read(sKey + "/params", &sValue);
         pVm->SetParams(sValue);
         m_pConfig->Read(sKey + "/memory", &lValue);
@@ -437,9 +516,12 @@ void QEMU_ManagerFrame::OnStartVm(wxCommandEvent& event)
     QemuVm* pVm = GetSelectedVm();
     if(!pVm)
         return;
+    if(pVm->IsRunning())
+        return;
     pVm->Start();
     EnableEdit(false);
     m_pLblStatus->SetLabel("Starting...");
+    m_pLstLog->Append(pVm->GetCommand(true, true));
 }
 
 void QEMU_ManagerFrame::SaveScreen()
@@ -455,6 +537,7 @@ void QEMU_ManagerFrame::SaveScreen()
         m_pConfig->Write("left", GetPosition().x);
         m_pConfig->Write("top", GetPosition().y);
     }
+    m_pConfig->Write("split", m_pSplitter->GetSashPosition());
 }
 
 void QEMU_ManagerFrame::LoadScreen()
@@ -462,15 +545,17 @@ void QEMU_ManagerFrame::LoadScreen()
     if(!m_pConfig)
         return;
     m_pConfig->SetPath("/ScreenLayout");
-    int nX, nY, nWidth, nHeight;
+    int nX, nY, nWidth, nHeight, nSplit;
     bool bMaximised;
-    m_pConfig->Read(wxT("left"), &nX, 0);
-    m_pConfig->Read(wxT("top"), &nY, 0);
-    m_pConfig->Read(wxT("width"), &nWidth, 800);
-    m_pConfig->Read(wxT("height"), &nHeight, 600);
-    m_pConfig->Read(wxT("maximised"), &bMaximised, false);
+    m_pConfig->Read("left", &nX, 0);
+    m_pConfig->Read("top", &nY, 0);
+    m_pConfig->Read("width", &nWidth, 800);
+    m_pConfig->Read("height", &nHeight, 600);
+    m_pConfig->Read("maximised", &bMaximised, false);
     Maximize(bMaximised);
     SetSize(nWidth, nHeight);
+    m_pConfig->Read("split", &nSplit, 100);
+    m_pSplitter->SetSashPosition(nSplit);
     bool bCanSee = false;
 	for(unsigned int nDisplay = 0; nDisplay < wxDisplay::GetCount(); nDisplay++)
     {
@@ -502,11 +587,59 @@ void QEMU_ManagerFrame::OnTimer(wxTimerEvent& event)
         return;
     bool bRunning = pVm->IsRunning();
     EnableEdit(!bRunning);
-    wxString sStatus;
-    if(bRunning)
-        sStatus = wxString::Format("Running (PID: %d)", pVm->GetPid());
-    else
-        sStatus = "Stopped";
-    m_pLblStatus->SetLabel(sStatus);
+    m_pLblStatus->SetLabel(GetStatus(pVm));
+}
 
+void QEMU_ManagerFrame::OnVmCdromChange(wxFileDirPickerEvent& event)
+{
+    QemuVm* pVm = GetSelectedVm();
+    if(!pVm)
+        return;
+    pVm->SetCdrom(event.GetPath());
+}
+
+void QEMU_ManagerFrame::OnNewHdd(wxCommandEvent& event)
+{
+    NewImage dlg(this);
+    int nResult = dlg.ShowModal();
+    if(nResult != wxID_OK)
+        return;
+    if(wxFileExists(dlg.m_pFilePickerImage->GetPath()) && wxYES != wxMessageBox("HDD image file already exists, overwrite?", "Warning", wxYES_NO))
+        return;
+    wxString sBacking;
+    if(!(dlg.m_pFilePickerBaseImage->GetPath().IsEmpty()))
+        sBacking = " -b " + dlg.m_pFilePickerBaseImage->GetPath();
+    wxString sCommand = wxFileName(QemuVm::QEMU_PATH + "/qemu-img").GetFullPath()
+        + " create -f "
+        + dlg.m_pCmbDiskType->GetString(dlg.m_pCmbDiskType->GetSelection())
+        + sBacking
+        + " " + wxFileName(dlg.m_pFilePickerImage->GetPath()).GetFullPath()
+        + " " + dlg.m_pTxtSize->GetValue();
+    long lResult = wxExecute(sCommand, wxEXEC_HIDE_CONSOLE | wxEXEC_SYNC);
+    if(lResult)
+    {
+        wxMessageBox("Failed to create new disk image", "An error has occured!");
+        return;
+    }
+    wxMessageBox("New disk image created", "Success");
+    QemuVm* pVm = GetSelectedVm();
+    if(!pVm)
+        return;
+    pVm->SetImage(dlg.m_pFilePickerImage->GetPath());
+    m_pFilePickerHdd->SetPath(pVm->GetImage());
+}
+
+void QEMU_ManagerFrame::OnLogDClick(wxCommandEvent& event)
+{
+    if(wxTheClipboard->Open())
+        wxTheClipboard->SetData(new wxTextDataObject(event.GetString()));
+}
+
+void QEMU_ManagerFrame::OnEnableCdrom(wxCommandEvent& event)
+{
+    QemuVm* pVm = GetSelectedVm();
+    if(!pVm)
+        return;
+    pVm->EnableCdrom(event.IsChecked());
+    m_pFilePickerCdrom->Enable(pVm->IsCdromEnabled());
 }
