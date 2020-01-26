@@ -321,6 +321,18 @@ void QEMU_ManagerFrame::OnVmSelect(wxCommandEvent& event)
     bool bRunning = pVm->IsRunning();
     EnableEdit(!bRunning);
     m_pLblStatus->SetLabel(GetStatus(pVm));
+
+    // Make QAPI connection
+    wxIPV4address ipAddr;
+    ipAddr.Hostname("localhost");
+    ipAddr.Service(pVm->GetApiPort());
+    if(!m_socketApi.Connect(ipAddr))
+        return;
+    char pBuffer[1024];
+    m_socketApi.Read(pBuffer, sizeof(pBuffer));
+    pBuffer[1023] = 0;
+    m_pLstLog->Append(wxString(pBuffer));
+    //!@todo Do something useful on QAPI link
 }
 
 

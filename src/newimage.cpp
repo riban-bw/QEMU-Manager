@@ -1,3 +1,12 @@
+/***************************************************************
+ * Name:      newimage.cpp
+ * Purpose:   Code for NewImage Class
+ * Author:    Brian Walton (brian@riban.co.uk)
+ * Created:   2020-01-23
+ * Copyright: Brian Walton (riban.co.uk)
+ * License:   GPL V3
+ **************************************************************/
+
 #include "newimage.h"
 
 //(*InternalHeaders(NewImage)

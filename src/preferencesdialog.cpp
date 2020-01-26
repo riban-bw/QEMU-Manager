@@ -1,3 +1,12 @@
+/***************************************************************
+ * Name:      preferencesdialog.cpp
+ * Purpose:   Code for PreferencesDialog Class
+ * Author:    Brian Walton (brian@riban.co.uk)
+ * Created:   2020-01-23
+ * Copyright: Brian Walton (riban.co.uk)
+ * License:   GPL V3
+ **************************************************************/
+
 #include "preferencesdialog.h"
 #include <wx/dirdlg.h>
 #include "qemuvm.h"

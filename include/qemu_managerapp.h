@@ -1,5 +1,5 @@
 /***************************************************************
- * Name:      QEMU_ManagerApp.h
+ * Name:      qemu_managerapp.h
  * Purpose:   Defines Application Class
  * Author:    Brian Walton (brian@riban.co.uk)
  * Created:   2020-01-23
@@ -7,8 +7,7 @@
  * License:   GPL V3
  **************************************************************/
 
-#ifndef QEMU_MANAGERAPP_H
-#define QEMU_MANAGERAPP_H
+#pragma once
 
 #include <wx/app.h>
 
@@ -18,4 +17,3 @@ class QEMU_ManagerApp : public wxApp
         virtual bool OnInit();
 };
 
-#endif // QEMU_MANAGERAPP_H

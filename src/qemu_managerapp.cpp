@@ -1,5 +1,5 @@
 /***************************************************************
- * Name:      QEMU_ManagerApp.cpp
+ * Name:      qemu_managerapp.cpp
  * Purpose:   Code for Application Class
  * Author:    Brian Walton (brian@riban.co.uk)
  * Created:   2020-01-23

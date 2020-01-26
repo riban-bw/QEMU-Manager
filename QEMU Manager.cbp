@@ -113,6 +113,8 @@
 		<Unit filename="include/qemuvm.h" />
 		<Unit filename="resource.rc">
 			<Option compilerVar="WINDRES" />
+			<Option target="MSW Debug" />
+			<Option target="MSW Release" />
 		</Unit>
 		<Unit filename="src/newimage.cpp" />
 		<Unit filename="src/preferencesdialog.cpp" />

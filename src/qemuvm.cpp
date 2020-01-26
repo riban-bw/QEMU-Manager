@@ -1,11 +1,12 @@
 /***************************************************************
  * Name:      qemuvm.cpp
- * Purpose:   Code for QEMU VM
+ * Purpose:   Code for QemuVm Class
  * Author:    Brian Walton (brian@riban.co.uk)
  * Created:   2020-01-23
  * Copyright: Brian Walton (riban.co.uk)
  * License:   GPL-V3
  **************************************************************/
+
 #include "qemuvm.h"
 #include <wx/filename.h>
 #include <wx/process.h>

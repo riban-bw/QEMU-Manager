@@ -7,8 +7,7 @@
  * License:   GPL-V3
  **************************************************************/
 
-#ifndef QEMU_MANAGERMAIN_H
-#define QEMU_MANAGERMAIN_H
+#pragma once
 
 //(*Headers(QEMU_ManagerFrame)
 #include <wx/button.h>
@@ -32,6 +31,7 @@
 #include <vector>
 #include "qemuvm.h"
 #include <wx/config.h>
+#include <wx/socket.h>
 
 class QEMU_ManagerFrame: public wxFrame
 {
@@ -202,8 +202,7 @@ class QEMU_ManagerFrame: public wxFrame
         std::vector<QemuVm*> m_vVm; // List of VMs
         int m_nCurrentVm; // Index of currently selected VM within m_vVm or -1 for none selected
         wxConfig* m_pConfig = NULL; // Pointer to the configuration
+        wxSocketClient m_socketApi; // Client socket for QAPI
 
         DECLARE_EVENT_TABLE()
 };
-
-#endif // QEMU_MANAGERMAIN_H

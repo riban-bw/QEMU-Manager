@@ -1,6 +1,6 @@
 /***************************************************************
  * Name:      qemuvm.h
- * Purpose:   Defines QEMU VM
+ * Purpose:   Defines QemuVm Class
  * Author:    Brian Walton (brian@riban.co.uk)
  * Created:   2020-01-23
  * Copyright: Brian Walton (riban.co.uk)
