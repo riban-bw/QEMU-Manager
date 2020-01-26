@@ -442,7 +442,7 @@ void QEMU_ManagerFrame::PopulateSystems()
     m_pCmbSystem->Clear();
     // Get the available systems from the executable file names
     wxArrayString asFiles;
-    wxDir::GetAllFiles(QemuVm::QEMU_PATH, &asFiles, "qemu-system-*");
+    wxDir::GetAllFiles(QemuVm::QEMU_PATH, &asFiles, "qemu-system-*", wxDIR_FILES);
     for(unsigned int nIndex = 0; nIndex < asFiles.GetCount(); ++nIndex)
     {
         wxString sSystem = asFiles[nIndex].AfterLast('-');
