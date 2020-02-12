@@ -17,13 +17,12 @@
 					<Add option="-g" />
 					<Add option="-pipe" />
 					<Add option="-mthreads" />
-					<Add option="-DWXUSINGDLL" />
-					<Add option="-DwxUSE_UNICODE" />
 					<Add option="-D__GNUWIN32__" />
 					<Add option="-D__WXMSW__" />
 					<Add option="-D__WXDEBUG__" />
 					<Add directory="$(#wx)/lib/gcc_dll/mswud" />
 					<Add directory="$(#wx)/include" />
+					<Add directory="include" />
 				</Compiler>
 				<ResourceCompiler>
 					<Add directory="$(#wx)/include" />
@@ -39,15 +38,13 @@
 				<Option output="bin/Release/QEMU Manager" prefix_auto="1" extension_auto="1" />
 				<Option object_output="obj/Release/" />
 				<Option type="0" />
-				<Option compiler="gcc" />
+				<Option compiler="mingw_64" />
 				<Option projectCompilerOptionsRelation="1" />
 				<Option projectLinkerOptionsRelation="2" />
 				<Compiler>
 					<Add option="-O2" />
 					<Add option="-pipe" />
 					<Add option="-mthreads" />
-					<Add option="-DWXUSINGDLL" />
-					<Add option="-DwxUSE_UNICODE" />
 					<Add option="-D__GNUWIN32__" />
 					<Add option="-D__WXMSW__" />
 					<Add directory="$(#wx)/lib/gcc_dll/mswu" />
@@ -76,6 +73,7 @@
 					<Add option="-g" />
 					<Add option="`wx-config --cxxflags`" />
 					<Add option="-D__WXDEBUG__" />
+					<Add directory="include" />
 				</Compiler>
 				<Linker>
 					<Add option="`wx-config --libs`" />
@@ -91,6 +89,7 @@
 				<Compiler>
 					<Add option="-O2" />
 					<Add option="`wx-config --cxxflags`" />
+					<Add directory="include" />
 				</Compiler>
 				<ResourceCompiler>
 					<Add directory="$(#wx)/lib/gcc_dll/mswu" />
@@ -108,16 +107,25 @@
 		</Compiler>
 		<Unit filename="include/newimage.h" />
 		<Unit filename="include/preferencesdialog.h" />
+		<Unit filename="include/qapi.h" />
 		<Unit filename="include/qemu_managerapp.h" />
 		<Unit filename="include/qemu_managermain.h" />
 		<Unit filename="include/qemuvm.h" />
+		<Unit filename="include/wx/json_defs.h" />
+		<Unit filename="include/wx/jsonreader.h" />
+		<Unit filename="include/wx/jsonval.h" />
+		<Unit filename="include/wx/jsonwriter.h" />
 		<Unit filename="resource.rc">
 			<Option compilerVar="WINDRES" />
 			<Option target="MSW Debug" />
 			<Option target="MSW Release" />
 		</Unit>
+		<Unit filename="src/jsonreader.cpp" />
+		<Unit filename="src/jsonval.cpp" />
+		<Unit filename="src/jsonwriter.cpp" />
 		<Unit filename="src/newimage.cpp" />
 		<Unit filename="src/preferencesdialog.cpp" />
+		<Unit filename="src/qapi.cpp" />
 		<Unit filename="src/qemu_managerapp.cpp" />
 		<Unit filename="src/qemu_managermain.cpp" />
 		<Unit filename="src/qemuvm.cpp" />

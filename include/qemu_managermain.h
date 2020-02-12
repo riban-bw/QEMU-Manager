@@ -73,6 +73,8 @@ class QEMU_ManagerFrame: public wxFrame
         static const long ID_TEXTCTRL1;
         static const long ID_STATICTEXT2;
         static const long ID_CHOICE1;
+        static const long ID_STATICTEXT10;
+        static const long ID_CHOICE2;
         static const long ID_STATICTEXT3;
         static const long ID_FILEPICKERCTRL1;
         static const long ID_BUTTON_NEWHDD;
@@ -109,6 +111,7 @@ class QEMU_ManagerFrame: public wxFrame
         wxButton* m_pBtnNewHdd;
         wxCheckBox* m_pChkEnableCdrom;
         wxCheckBox* m_pChkShowDisplay;
+        wxChoice* m_pCmbMachine;
         wxChoice* m_pCmbSystem;
         wxFilePickerCtrl* m_pFilePickerCdrom;
         wxFilePickerCtrl* m_pFilePickerHdd;
@@ -127,6 +130,7 @@ class QEMU_ManagerFrame: public wxFrame
         wxStaticText* StaticText6;
         wxStaticText* StaticText7;
         wxStaticText* StaticText8;
+        wxStaticText* StaticText9;
         wxStaticText* m_pLblStatus;
         wxStatusBar* m_pStatusbar;
         wxTextCtrl* m_pTxtMemory;
@@ -163,7 +167,19 @@ class QEMU_ManagerFrame: public wxFrame
         */
         void SaveVm(QemuVm* pVm);
 
+        /** Populates the list of available systems
+        */
         void PopulateSystems();
+
+        /** Populates the list of available machines based on system
+        */
+        void PopulateMachine();
+
+        /** Get path to a VM within config
+        *   @param pVm Ponter to VM
+        *   @retval wxString Config path
+        */
+        wxString GetConfigPath(QemuVm* pVm);
 
         /** Get a pointer to the VM currently selected in the list
         */

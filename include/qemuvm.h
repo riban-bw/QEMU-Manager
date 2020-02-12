@@ -35,6 +35,16 @@ class QemuVm
         */
         void SetSystem(wxString sSystem);
 
+        /** @brief  Get machine type
+        *   @retval wxString System
+        */
+        wxString GetMachine();
+
+        /** @brief  Set machine type (depends on system type)
+        *   @param  sMachine Machine type
+        */
+        void SetMachine(wxString sSystem);
+
         /** @brief  Get disk image full path and filename
         *   @retval wxString Disk image path and filename
         */
@@ -133,7 +143,8 @@ class QemuVm
 
     private:
         wxString m_sName = "New VM";
-        wxString m_sSystem = "i386";
+        wxString m_sSystem = "x86_64";
+        wxString m_sMachine = "pc";
         wxString m_sImage;
         wxString m_sCdrom;
         unsigned int m_nMemory = 512;

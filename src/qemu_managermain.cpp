@@ -18,6 +18,7 @@
 #include "newimage.h"
 #include <wx/clipbrd.h>
 #include <list>
+#include "qapi.h"
 
 using namespace std;
 
@@ -37,6 +38,8 @@ const long QEMU_ManagerFrame::ID_STATICTEXT1 = wxNewId();
 const long QEMU_ManagerFrame::ID_TEXTCTRL1 = wxNewId();
 const long QEMU_ManagerFrame::ID_STATICTEXT2 = wxNewId();
 const long QEMU_ManagerFrame::ID_CHOICE1 = wxNewId();
+const long QEMU_ManagerFrame::ID_STATICTEXT10 = wxNewId();
+const long QEMU_ManagerFrame::ID_CHOICE2 = wxNewId();
 const long QEMU_ManagerFrame::ID_STATICTEXT3 = wxNewId();
 const long QEMU_ManagerFrame::ID_FILEPICKERCTRL1 = wxNewId();
 const long QEMU_ManagerFrame::ID_BUTTON_NEWHDD = wxNewId();
@@ -118,6 +121,11 @@ QEMU_ManagerFrame::QEMU_ManagerFrame(wxWindow* parent,wxWindowID id)
     FlexGridSizer2->Add(StaticText2, 1, wxALL|wxALIGN_CENTER_HORIZONTAL|wxALIGN_CENTER_VERTICAL, 5);
     m_pCmbSystem = new wxChoice(m_pPnlSettings, ID_CHOICE1, wxDefaultPosition, wxDefaultSize, 0, 0, 0, wxDefaultValidator, _T("ID_CHOICE1"));
     FlexGridSizer2->Add(m_pCmbSystem, 1, wxALL|wxEXPAND, 5);
+    FlexGridSizer2->Add(-1,-1,1, wxALL|wxALIGN_CENTER_HORIZONTAL|wxALIGN_CENTER_VERTICAL, 5);
+    StaticText9 = new wxStaticText(m_pPnlSettings, ID_STATICTEXT10, _("Machine"), wxDefaultPosition, wxDefaultSize, 0, _T("ID_STATICTEXT10"));
+    FlexGridSizer2->Add(StaticText9, 1, wxALL|wxALIGN_CENTER_HORIZONTAL|wxALIGN_CENTER_VERTICAL, 5);
+    m_pCmbMachine = new wxChoice(m_pPnlSettings, ID_CHOICE2, wxDefaultPosition, wxDefaultSize, 0, 0, 0, wxDefaultValidator, _T("ID_CHOICE2"));
+    FlexGridSizer2->Add(m_pCmbMachine, 1, wxALL|wxEXPAND, 5);
     FlexGridSizer2->Add(-1,-1,1, wxALL|wxALIGN_CENTER_HORIZONTAL|wxALIGN_CENTER_VERTICAL, 5);
     StaticText3 = new wxStaticText(m_pPnlSettings, ID_STATICTEXT3, _("Disk Image"), wxDefaultPosition, wxDefaultSize, 0, _T("ID_STATICTEXT3"));
     FlexGridSizer2->Add(StaticText3, 1, wxALL|wxALIGN_CENTER_HORIZONTAL|wxALIGN_CENTER_VERTICAL, 5);
@@ -226,8 +234,8 @@ QEMU_ManagerFrame::~QEMU_ManagerFrame()
 {
     //(*Destroy(QEMU_ManagerFrame)
     //*)
-    while(m_vVm.size())
-        DeleteVm(m_vVm[0]);
+    for(auto it = m_vVm.begin(); it != m_vVm.end(); ++it)
+        delete(*it);
 }
 
 void QEMU_ManagerFrame::OnClose(wxCloseEvent& event)
@@ -275,7 +283,11 @@ void QEMU_ManagerFrame::DeleteVm(QemuVm* pVm)
 {
     if(!pVm)
         return;
-    //!@todo Stop VM
+    if(pVm->IsRunning())
+    {
+        wxMessageBox("Please stop '" + pVm->GetName() + "' before deleting", "Warning");
+        return;
+    }
     auto it = m_vVm.begin();
     for(; it != m_vVm.end(); ++it)
     {
@@ -287,7 +299,7 @@ void QEMU_ManagerFrame::DeleteVm(QemuVm* pVm)
     m_vVm.erase(it);
     RefreshVmList();
     if(m_pConfig)
-        m_pConfig->DeleteGroup(pVm->GetName());
+        m_pConfig->DeleteGroup(GetConfigPath(pVm));
     delete pVm;
 }
 
@@ -317,21 +329,18 @@ void QEMU_ManagerFrame::OnVmSelect(wxCommandEvent& event)
     m_pFilePickerCdrom->SetPath(pVm->GetCdrom());
     m_pTxtMemory->SetValue(wxString::Format("%d", pVm->GetMemory()));
     m_pCmbSystem->SetSelection(m_pCmbSystem->FindString(pVm->GetSystem()));
+    m_pCmbMachine->SetSelection(m_pCmbMachine->FindString(pVm->GetMachine()));
     m_pChkShowDisplay->SetValue(pVm->GetShowDisplay());
     bool bRunning = pVm->IsRunning();
     EnableEdit(!bRunning);
     m_pLblStatus->SetLabel(GetStatus(pVm));
+    if(!bRunning)
+        return;
 
     // Make QAPI connection
-    wxIPV4address ipAddr;
-    ipAddr.Hostname("localhost");
-    ipAddr.Service(pVm->GetApiPort());
-    if(!m_socketApi.Connect(ipAddr))
-        return;
-    char pBuffer[1024];
-    m_socketApi.Read(pBuffer, sizeof(pBuffer));
-    pBuffer[1023] = 0;
-    m_pLstLog->Append(wxString(pBuffer));
+    QAPI qApi(pVm->GetApiPort());
+    m_pLstLog->Append(qApi.GetLastRx());
+    m_pLstLog->Append(pVm->GetName() + " status: " + qApi.GetStatus());
     //!@todo Do something useful on QAPI link
 }
 
@@ -359,21 +368,29 @@ void QEMU_ManagerFrame::EnableEdit(bool bEnable)
     return;
 }
 
+wxString QEMU_ManagerFrame::GetConfigPath(QemuVm* pVm)
+{
+    if(!pVm)
+        return "";
+    return wxString::Format("/VM/%s-%d", pVm->GetName().c_str(), pVm->GetApiPort());
+}
+
 void QEMU_ManagerFrame::SaveVm(QemuVm* pVm)
 {
     if(!pVm || !m_pConfig)
         return;
-    m_pConfig->SetPath("/VM");
-    m_pConfig->Write(wxString::Format("%s-%d/apiport", pVm->GetName().c_str(), pVm->GetApiPort()), pVm->GetApiPort());
-    m_pConfig->Write(wxString::Format("%s-%d/name", pVm->GetName().c_str(), pVm->GetApiPort()), pVm->GetName());
-    m_pConfig->Write(wxString::Format("%s-%d/system", pVm->GetName().c_str(), pVm->GetApiPort()), pVm->GetSystem());
-    m_pConfig->Write(wxString::Format("%s-%d/image", pVm->GetName().c_str(), pVm->GetApiPort()), pVm->GetImage());
-    m_pConfig->Write(wxString::Format("%s-%d/cdrom", pVm->GetName().c_str(), pVm->GetApiPort()), pVm->GetCdrom());
-    m_pConfig->Write(wxString::Format("%s-%d/memory", pVm->GetName().c_str(), pVm->GetApiPort()), pVm->GetMemory());
-    m_pConfig->Write(wxString::Format("%s-%d/showdisplay", pVm->GetName().c_str(), pVm->GetApiPort()), pVm->GetShowDisplay());
-    m_pConfig->Write(wxString::Format("%s-%d/params", pVm->GetName().c_str(), pVm->GetApiPort()), pVm->GetParams());
-    m_pConfig->Write(wxString::Format("%s-%d/pid", pVm->GetName().c_str(), pVm->GetApiPort()), pVm->GetPid());
-    m_pConfig->Write(wxString::Format("%s-%d/enablecdrom", pVm->GetName().c_str(), pVm->GetApiPort()), pVm->IsCdromEnabled());
+    m_pConfig->SetPath(GetConfigPath(pVm));
+    m_pConfig->Write("apiport", pVm->GetApiPort());
+    m_pConfig->Write("name", pVm->GetName());
+    m_pConfig->Write("system", pVm->GetSystem());
+    m_pConfig->Write("machine", pVm->GetMachine());
+    m_pConfig->Write("image", pVm->GetImage());
+    m_pConfig->Write("cdrom", pVm->GetCdrom());
+    m_pConfig->Write("memory", pVm->GetMemory());
+    m_pConfig->Write("showdisplay", pVm->GetShowDisplay());
+    m_pConfig->Write("params", pVm->GetParams());
+    m_pConfig->Write("pid", pVm->GetPid());
+    m_pConfig->Write("enablecdrom", pVm->IsCdromEnabled());
 }
 
 unsigned int QEMU_ManagerFrame::GetNextApiPort()
@@ -429,6 +446,8 @@ void QEMU_ManagerFrame::LoadConfig()
         pVm->SetName(sValue);
         m_pConfig->Read(sKey + "/system", &sValue);
         pVm->SetSystem(sValue);
+        m_pConfig->Read(sKey + "/machine", &sValue);
+        pVm->SetMachine(sValue);
         m_pConfig->Read(sKey + "/image", &sValue);
         pVm->SetImage(sValue);
         m_pConfig->Read(sKey + "/cdrom", &sValue);
@@ -462,6 +481,26 @@ void QEMU_ManagerFrame::PopulateSystems()
             sSystem = sSystem.BeforeFirst('.'); // Remove filename extension if present
         m_pCmbSystem->Append(sSystem);
     }
+}
+
+void QEMU_ManagerFrame::PopulateMachine()
+{
+    m_pCmbMachine->Clear();
+    // Get the available machines based on the system using help command
+    //!@todo Populate machines
+    QemuVm* pVm = GetSelectedVm();
+    if(!pVm)
+        return;
+    wxString sCommand = pVm->GetCommand(true, false);
+    sCommand += " -machine help";
+    wxArrayString asResult;
+    wxExecute(sCommand, asResult);
+    for(unsigned int nMachine = 1; nMachine < asResult.Count(); ++nMachine)
+    {
+        m_pCmbMachine->Append(asResult[nMachine].BeforeFirst(' '));
+    }
+    if(m_pCmbMachine->GetCount())
+        m_pCmbMachine->SetSelection(0);
 }
 
 void QEMU_ManagerFrame::SaveConfig()
@@ -526,6 +565,7 @@ void QEMU_ManagerFrame::OnVmSystemChange(wxCommandEvent& event)
     if(!pVm)
         return;
     pVm->SetSystem(event.GetString());
+    PopulateMachine();
 }
 
 void QEMU_ManagerFrame::OnVmShowDisplayChange(wxCommandEvent& event)

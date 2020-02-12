@@ -38,13 +38,22 @@ void QemuVm::SetName(wxString sName)
 
 wxString QemuVm::GetSystem()
 {
-
     return m_sSystem;
 }
 
 void QemuVm::SetSystem(wxString sSystem)
 {
     m_sSystem = sSystem;
+}
+
+wxString QemuVm::GetMachine()
+{
+    return m_sMachine;
+}
+
+void QemuVm::SetMachine(wxString sMachine)
+{
+    m_sMachine = sMachine;
 }
 
 wxString QemuVm::GetImage()
